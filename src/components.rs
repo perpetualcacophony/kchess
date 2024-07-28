@@ -10,11 +10,7 @@ pub struct Components {
 }
 
 impl<'c> Piece<'c> {
-    pub fn legal_moves(
-        self,
-        board: &Board,
-        pieces: impl IntoIterator<Item = Self> + Copy,
-    ) -> Vec<Space> {
+    pub fn legal_moves(self, board: &Board, mut pieces: Pieces<'c>) -> Vec<Space> {
         let mut moves = Vec::new();
 
         match self.piece {
@@ -24,13 +20,13 @@ impl<'c> Piece<'c> {
 
                 if *self.moved {
                     if let Some(space) = steps.next() {
-                        if !pieces.into_iter().any(|piece| piece.space == &space) {
+                        if !pieces.by_ref().any(|piece| piece.space == &space) {
                             moves.push(space)
                         }
                     }
                 } else {
                     for space in steps {
-                        if !pieces.into_iter().any(|piece| piece.space == &space) {
+                        if !pieces.by_ref().any(|piece| piece.space == &space) {
                             moves.push(space)
                         }
                     }
@@ -40,7 +36,7 @@ impl<'c> Piece<'c> {
                     *self.side,
                     self.space.as_unchecked(),
                 )) {
-                    if let Some(piece) = pieces.into_iter().find(|piece| piece.space == &space) {
+                    if let Some(piece) = pieces.by_ref().find(|piece| piece.space == &space) {
                         if piece.side != self.side {
                             moves.push(space)
                         } else {
@@ -53,7 +49,7 @@ impl<'c> Piece<'c> {
             }
             ChessPiece::Knight => {
                 for space in board.check_iter(pieces::knight::moves(self.space.as_unchecked())) {
-                    if let Some(piece) = pieces.into_iter().find(|piece| piece.space == &space) {
+                    if let Some(piece) = pieces.by_ref().find(|piece| piece.space == &space) {
                         if piece.side != self.side {
                             moves.push(space)
                         }
@@ -83,8 +79,7 @@ impl<'c> Piece<'c> {
                 for mut ray in rays {
                     loop {
                         if let Some(space) = ray.next() {
-                            if let Some(piece) =
-                                pieces.into_iter().find(|piece| piece.space == &space)
+                            if let Some(piece) = pieces.by_ref().find(|piece| piece.space == &space)
                             {
                                 if piece.side != self.side {
                                     moves.push(space)
@@ -100,7 +95,7 @@ impl<'c> Piece<'c> {
             }
             ChessPiece::King => {
                 for space in board.check_iter(pieces::king::moves(self.space.as_unchecked())) {
-                    if let Some(piece) = pieces.into_iter().find(|piece| piece.space == &space) {
+                    if let Some(piece) = pieces.by_ref().find(|piece| piece.space == &space) {
                         if piece.side != self.side {
                             moves.push(space)
                         } else {
@@ -168,7 +163,7 @@ impl<'c> Side<'c> {
 
 macro_rules! bundle {
     ($ident:ident $($field:ident: $type:ty),*) => {
-        #[derive(Copy, Clone, Debug)]
+        #[derive(Debug)]
         pub struct $ident<'c> {
             $(
                 pub $field: &'c $type
@@ -224,7 +219,7 @@ bundle! {
     captured: bool
 }
 
-pub struct MoveTo<'c> {
+/* pub struct MoveTo<'c> {
     space: Space,
     capture: Option<&'c Piece<'c>>,
 }
@@ -242,5 +237,28 @@ impl<'c> MoveTo<'c> {
             space,
             capture: Some(piece),
         }
+    }
+} */
+
+type PiecesBase<'c> = std::collections::hash_map::Values<'c, crate::EntityId, Components>;
+
+#[derive(Debug)]
+pub struct Pieces<'c> {
+    base: PiecesBase<'c>,
+}
+
+impl<'c> Pieces<'c> {
+    pub fn get(game: &'c crate::Game) -> Self {
+        Self {
+            base: game.map.values(),
+        }
+    }
+}
+
+impl<'c> Iterator for Pieces<'c> {
+    type Item = Piece<'c>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.base.next().and_then(Piece::get)
     }
 }

@@ -33,8 +33,8 @@ impl Game {
         self.pieces().find(|piece| piece.space == &space)
     }
 
-    pub fn pieces(&self) -> impl Iterator<Item = components::Piece<'_>> {
-        self.components().filter_map(components::Piece::get)
+    pub fn pieces(&self) -> components::Pieces<'_> {
+        components::Pieces::get(self)
     }
 
     pub fn grid(&self) -> Vec<Vec<components::Piece<'_>>> {
