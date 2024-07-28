@@ -15,11 +15,11 @@ impl Space {
         self.file
     }
 
-    pub unsafe fn new_unchecked(rank: usize, file: usize) -> Self {
+    pub(super) unsafe fn new_unchecked(rank: usize, file: usize) -> Self {
         Self::from_unchecked(UncheckedSpace::new(rank, file))
     }
 
-    pub unsafe fn from_unchecked(unchecked: UncheckedSpace) -> Self {
+    unsafe fn from_unchecked(unchecked: UncheckedSpace) -> Self {
         Self {
             rank: unchecked.rank,
             file: unchecked.file,
@@ -45,7 +45,7 @@ impl UncheckedSpace {
         Self { rank, file }
     }
 
-    pub(crate) fn cardinal(mut self, cardinal: Cardinal) -> Self {
+    pub(super) fn cardinal(mut self, cardinal: Cardinal) -> Self {
         match cardinal {
             Cardinal::North => self.file += 1,
             Cardinal::East => self.rank += 1,
