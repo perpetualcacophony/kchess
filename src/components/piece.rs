@@ -12,8 +12,9 @@ bundle! {
 }
 
 impl<'c> Piece<'c> {
-    pub fn legal_moves(&self, board: &Board, mut pieces: game::Pieces<'c>) -> Vec<Space> {
+    pub fn legal_moves(&self, board: &Board, pieces: game::AllPieces<'c>) -> Vec<Space> {
         let mut moves = Vec::new();
+        let mut pieces = pieces.not_captured();
 
         match self.piece {
             ChessPiece::Pawn => {

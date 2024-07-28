@@ -1,7 +1,7 @@
 use crate::{components, Board, ChessSide, Components, EntityId, Space};
 
 pub mod pieces;
-pub use pieces::Pieces;
+pub use pieces::AllPieces;
 
 pub struct Game {
     board: Board,
@@ -17,8 +17,8 @@ impl Game {
         self.pieces().find(|piece| piece.space == &space)
     }
 
-    pub fn pieces(&self) -> Pieces<'_> {
-        Pieces::get(self)
+    pub fn pieces(&self) -> AllPieces<'_> {
+        AllPieces::get(self)
     }
 
     pub fn grid(&self) -> Vec<Vec<components::Piece<'_>>> {
