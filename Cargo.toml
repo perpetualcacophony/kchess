@@ -4,3 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+rand = { version = "0.8.5", optional = true, default-features = false }
+
+[features]
+default = []
+rand = ["dep:rand"]
+rand_full = ["rand", "rand/std", "rand/std_rng"]
