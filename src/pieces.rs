@@ -12,7 +12,7 @@ pub mod king;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ChessPiece {
-    Pawn { moved: bool },
+    Pawn,
     Knight,
     Bishop,
     Rook,
@@ -21,16 +21,9 @@ pub enum ChessPiece {
 }
 
 impl ChessPiece {
-    pub const fn moved(self) -> bool {
-        match self {
-            Self::Pawn { moved } => moved,
-            _ => false,
-        }
-    }
-
     pub const fn value(self) -> usize {
         match self {
-            Self::Pawn { .. } => 1,
+            Self::Pawn => 1,
             Self::Knight => 3,
             Self::Bishop => 3,
             Self::Rook => 5,

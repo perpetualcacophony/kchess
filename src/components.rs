@@ -6,6 +6,7 @@ pub struct Components {
     piece: Option<ChessPiece>,
     side: Option<ChessSide>,
     captured: Option<bool>,
+    moved: Option<bool>,
 }
 
 impl<'c> Piece<'c> {
@@ -17,11 +18,11 @@ impl<'c> Piece<'c> {
         let mut moves = Vec::new();
 
         match self.piece {
-            ChessPiece::Pawn { moved } => {
+            ChessPiece::Pawn => {
                 let mut steps =
                     board.check_iter(pieces::pawn::steps(*self.side, self.space.as_unchecked()));
 
-                if *moved {
+                if *self.moved {
                     if let Some(space) = steps.next() {
                         if !pieces.into_iter().any(|piece| piece.space == &space) {
                             moves.push(space)
@@ -126,16 +127,16 @@ impl<'c> PieceMut<'c> {
     }
 
     pub fn move_to(self, space: Space, board: &Board, mut pieces: impl Iterator<Item = Self>) {
+        *self.moved = true;
+
         if let Some(piece) = pieces.find(|piece| *piece.space == space) {
             piece.capture()
         }
 
         *self.space = space;
 
-        if matches!(self.piece, ChessPiece::Pawn { .. })
-            && board.last_rank(*self.side, self.space.rank())
-        {
-            self.promote()
+        if *self.piece == ChessPiece::Pawn && board.last_rank(*self.side, self.space.rank()) {
+            self.promote();
         }
     }
 }
@@ -157,6 +158,11 @@ impl<'c> Side<'c> {
 
     pub fn advantage(&self, rhs: &Self) -> isize {
         self.material() as isize - rhs.material() as isize
+    }
+
+    pub fn pieces(&self, kind: ChessPiece) -> impl Iterator<Item = &Piece<'c>> {
+        self.active_pieces()
+            .filter(move |piece| piece.piece == &kind)
     }
 }
 
@@ -202,6 +208,7 @@ macro_rules! bundle {
 
 bundle! {
     Piece
+    moved: bool,
     space: Space,
     piece: ChessPiece,
     side: ChessSide,
@@ -210,6 +217,7 @@ bundle! {
 
 bundle! {
     mut PieceMut
+    moved: bool,
     space: Space,
     piece: ChessPiece,
     side: ChessSide,
