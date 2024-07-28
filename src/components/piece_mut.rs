@@ -10,13 +10,18 @@ bundle! {
 }
 
 impl<'c> PieceMut<'c> {
-    pub fn capture(self) {}
+    pub fn capture(&mut self) {}
 
-    pub fn promote(self) {
+    pub fn promote(&mut self) {
         *self.piece = ChessPiece::Queen;
     }
 
-    pub fn move_to(self, space: Space, board: &Board, mut pieces: impl Iterator<Item = Self>) {
+    pub fn move_to(
+        &mut self,
+        space: Space,
+        board: &Board,
+        mut pieces: impl Iterator<Item = &'c mut Self>,
+    ) {
         *self.moved = true;
 
         if let Some(piece) = pieces.find(|piece| *piece.space == space) {
