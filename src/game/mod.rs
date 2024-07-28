@@ -1,5 +1,8 @@
 use crate::{components, Board, ChessSide, Components, EntityId, Space};
 
+pub mod pieces;
+pub use pieces::Pieces;
+
 pub struct Game {
     board: Board,
     pub map: std::collections::HashMap<EntityId, Components>,
@@ -14,8 +17,8 @@ impl Game {
         self.pieces().find(|piece| piece.space == &space)
     }
 
-    pub fn pieces(&self) -> components::Pieces<'_> {
-        components::Pieces::get(self)
+    pub fn pieces(&self) -> Pieces<'_> {
+        Pieces::get(self)
     }
 
     pub fn grid(&self) -> Vec<Vec<components::Piece<'_>>> {

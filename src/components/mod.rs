@@ -41,26 +41,3 @@ impl<'c> MoveTo<'c> {
         }
     }
 } */
-
-type PiecesBase<'c> = std::collections::hash_map::Values<'c, crate::EntityId, Components>;
-
-#[derive(Debug)]
-pub struct Pieces<'c> {
-    base: PiecesBase<'c>,
-}
-
-impl<'c> Pieces<'c> {
-    pub fn get(game: &'c crate::Game) -> Self {
-        Self {
-            base: game.map.values(),
-        }
-    }
-}
-
-impl<'c> Iterator for Pieces<'c> {
-    type Item = Piece<'c>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.base.next().and_then(Piece::get)
-    }
-}

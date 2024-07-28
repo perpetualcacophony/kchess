@@ -16,6 +16,12 @@ macro_rules! bundle {
                 })
             }
         }
+
+        impl<'c> AsRef<Self> for $ident<'c> {
+            fn as_ref(&self) -> &Self {
+                self
+            }
+        }
     };
 
     (mut $ident:ident $($field:ident: $type:ty),*) => {
@@ -33,6 +39,18 @@ macro_rules! bundle {
                         $field: components.$field.as_mut()?
                     ),*
                 })
+            }
+        }
+
+        impl<'c> AsRef<Self> for $ident<'c> {
+            fn as_ref(&self) -> &Self {
+                self
+            }
+        }
+
+        impl<'c> AsMut<Self> for $ident<'c> {
+            fn as_mut(&mut self) -> &mut Self {
+                self
             }
         }
     };

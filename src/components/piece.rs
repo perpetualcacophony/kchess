@@ -1,6 +1,6 @@
 use crate::{pieces, Board, ChessPiece, ChessSide, Space};
 
-use super::Pieces;
+use crate::game;
 
 bundle! {
     Piece
@@ -12,7 +12,7 @@ bundle! {
 }
 
 impl<'c> Piece<'c> {
-    pub fn legal_moves(self, board: &Board, mut pieces: Pieces<'c>) -> Vec<Space> {
+    pub fn legal_moves(self, board: &Board, mut pieces: game::Pieces<'c>) -> Vec<Space> {
         let mut moves = Vec::new();
 
         match self.piece {
