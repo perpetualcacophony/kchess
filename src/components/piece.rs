@@ -1,12 +1,14 @@
 use crate::{pieces, Board, ChessPiece, ChessSide, Space};
 
-#[derive(Clone, Debug, Default)]
-pub struct Components {
-    space: Option<Space>,
-    piece: Option<ChessPiece>,
-    side: Option<ChessSide>,
-    captured: Option<bool>,
-    moved: Option<bool>,
+use super::Pieces;
+
+bundle! {
+    Piece
+    moved: bool,
+    space: Space,
+    piece: ChessPiece,
+    side: ChessSide,
+    captured: bool
 }
 
 impl<'c> Piece<'c> {
@@ -111,154 +113,5 @@ impl<'c> Piece<'c> {
         }
 
         moves
-    }
-}
-
-impl<'c> PieceMut<'c> {
-    pub fn capture(self) {}
-
-    pub fn promote(self) {
-        *self.piece = ChessPiece::Queen;
-    }
-
-    pub fn move_to(self, space: Space, board: &Board, mut pieces: impl Iterator<Item = Self>) {
-        *self.moved = true;
-
-        if let Some(piece) = pieces.find(|piece| *piece.space == space) {
-            piece.capture()
-        }
-
-        *self.space = space;
-
-        if *self.piece == ChessPiece::Pawn && board.last_rank(*self.side, self.space.rank()) {
-            self.promote();
-        }
-    }
-}
-
-pub struct Side<'c> {
-    pub side: ChessSide,
-    pub pieces: Vec<Piece<'c>>,
-}
-
-impl<'c> Side<'c> {
-    pub fn material(&self) -> usize {
-        self.active_pieces()
-            .fold(0, |total, piece| total + piece.piece.value())
-    }
-
-    pub fn active_pieces(&self) -> impl Iterator<Item = &Piece<'c>> {
-        self.pieces.iter().filter(|piece| !piece.captured)
-    }
-
-    pub fn advantage(&self, rhs: &Self) -> isize {
-        self.material() as isize - rhs.material() as isize
-    }
-
-    pub fn pieces(&self, kind: ChessPiece) -> impl Iterator<Item = &Piece<'c>> {
-        self.active_pieces()
-            .filter(move |piece| piece.piece == &kind)
-    }
-}
-
-macro_rules! bundle {
-    ($ident:ident $($field:ident: $type:ty),*) => {
-        #[derive(Debug)]
-        pub struct $ident<'c> {
-            $(
-                pub $field: &'c $type
-            ),*
-        }
-
-        impl<'c> $ident<'c> {
-            pub fn get(components: &'c Components) -> Option<Self> {
-                Some( Self {
-                    $(
-                        $field: components.$field.as_ref()?
-                    ),*
-                })
-            }
-        }
-    };
-
-    (mut $ident:ident $($field:ident: $type:ty),*) => {
-        #[derive(Debug)]
-        pub struct $ident<'c> {
-            $(
-                pub $field: &'c mut $type
-            ),*
-        }
-
-        impl<'c> $ident<'c> {
-            pub fn get(components: &'c mut Components) -> Option<Self> {
-                Some( Self {
-                    $(
-                        $field: components.$field.as_mut()?
-                    ),*
-                })
-            }
-        }
-    };
-}
-
-bundle! {
-    Piece
-    moved: bool,
-    space: Space,
-    piece: ChessPiece,
-    side: ChessSide,
-    captured: bool
-}
-
-bundle! {
-    mut PieceMut
-    moved: bool,
-    space: Space,
-    piece: ChessPiece,
-    side: ChessSide,
-    captured: bool
-}
-
-/* pub struct MoveTo<'c> {
-    space: Space,
-    capture: Option<&'c Piece<'c>>,
-}
-
-impl<'c> MoveTo<'c> {
-    pub fn step(space: Space) -> Self {
-        Self {
-            space,
-            capture: None,
-        }
-    }
-
-    pub fn capture(space: Space, piece: &'c Piece<'c>) -> Self {
-        Self {
-            space,
-            capture: Some(piece),
-        }
-    }
-} */
-
-type PiecesBase<'c> = std::collections::hash_map::Values<'c, crate::EntityId, Components>;
-
-#[derive(Debug)]
-pub struct Pieces<'c> {
-    base: PiecesBase<'c>,
-}
-
-impl<'c> Pieces<'c> {
-    pub fn get(game: &'c crate::Game) -> Self {
-        Self {
-            base: game.map.values(),
-        }
-    }
-}
-
-impl<'c> Iterator for Pieces<'c> {
-    type Item = Piece<'c>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.base.next().and_then(Piece::get)
     }
 }
