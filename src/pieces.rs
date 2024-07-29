@@ -1,5 +1,7 @@
 use std::usize;
 
+use crate::{direction::ray::Ray, ChessSide};
+
 pub mod pawn;
 
 pub mod knight;
@@ -56,48 +58,74 @@ pub struct ChessPieceStruct {
     can_promote: bool,
     valid_promotion: bool,
     checkmate_possible: bool,
+    rays: Vec<Box<dyn Ray>>,
+    capture_rays: Option<Vec<Box<dyn Ray>>>,
 }
 
 impl ChessPieceStruct {
-    pub const PAWN: Self = Self {
-        value: 1,
-        can_promote: true,
-        valid_promotion: false,
-        checkmate_possible: false,
-    };
+    pub fn pawn(side: ChessSide, moved: bool) -> Self {
+        Self {
+            value: 1,
+            can_promote: true,
+            valid_promotion: false,
+            checkmate_possible: false,
+            rays: vec![pawn::step_ray(side, moved).boxed()],
+            capture_rays: Some(pawn::capture_rays(side).map(Ray::boxed).into()),
+        }
+    }
 
-    pub const KNIGHT: Self = Self {
-        value: 3,
-        can_promote: false,
-        valid_promotion: true,
-        checkmate_possible: false,
-    };
+    pub fn knight() -> Self {
+        Self {
+            value: 3,
+            can_promote: false,
+            valid_promotion: true,
+            checkmate_possible: false,
+            rays: knight::rays().map(Ray::boxed).into(),
+            capture_rays: None,
+        }
+    }
 
-    pub const BISHOP: Self = Self {
-        value: 3,
-        can_promote: false,
-        valid_promotion: true,
-        checkmate_possible: false,
-    };
+    pub fn bishop() -> Self {
+        Self {
+            value: 3,
+            can_promote: false,
+            valid_promotion: true,
+            checkmate_possible: false,
+            rays: bishop::rays().map(Ray::boxed).into(),
+            capture_rays: None,
+        }
+    }
 
-    pub const ROOK: Self = Self {
-        value: 5,
-        can_promote: false,
-        valid_promotion: true,
-        checkmate_possible: false,
-    };
+    pub fn rook() -> Self {
+        Self {
+            value: 5,
+            can_promote: false,
+            valid_promotion: true,
+            checkmate_possible: false,
+            rays: rook::rays().map(Ray::boxed).into(),
+            capture_rays: None,
+        }
+    }
 
-    pub const QUEEN: Self = Self {
-        value: 9,
-        can_promote: false,
-        valid_promotion: true,
-        checkmate_possible: false,
-    };
+    pub fn queen() -> Self {
+        Self {
+            value: 9,
+            can_promote: false,
+            valid_promotion: true,
+            checkmate_possible: false,
+            rays: queen::rays().map(Ray::boxed).into(),
+            capture_rays: None,
+        }
+    }
 
-    pub const KING: Self = Self {
-        value: usize::MAX,
-        can_promote: false,
-        valid_promotion: false,
-        checkmate_possible: true,
-    };
+    pub fn king() -> Self {
+        Self {
+            value: usize::MAX,
+            can_promote: false,
+            valid_promotion: false,
+            checkmate_possible: true,
+            rays: king::rays().map(Ray::boxed).into(),
+            capture_rays: None,
+        }
+    }
 }
