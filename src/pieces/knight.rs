@@ -1,4 +1,10 @@
-use crate::{direction::Cardinal, Direction, UncheckedSpace};
+use crate::{
+    direction::{
+        ray::{LimitedRay, Ray},
+        Cardinal,
+    },
+    Direction, UncheckedSpace,
+};
 
 #[derive(Copy, Debug, Clone)]
 pub struct KnightMove {
@@ -28,4 +34,46 @@ pub fn moves(start: UncheckedSpace) -> [UncheckedSpace; 8] {
         .concat()
         .try_into()
         .unwrap()
+}
+
+impl Direction for KnightMove {
+    fn next_space(self, start: crate::UncheckedSpace) -> crate::UncheckedSpace {
+        start.step(self.long).step(self.long).step(self.short)
+    }
+
+    fn opposite(self) -> Self {
+        Self::new(!self.long, !self.short)
+    }
+
+    fn perpendicular(self) -> [Self; 2] {
+        todo!()
+    }
+}
+
+pub struct KnightRay {
+    inner: LimitedRay<KnightMove>,
+}
+
+impl KnightRay {
+    pub const fn new(direction: KnightMove) -> Self {
+        Self {
+            inner: LimitedRay::new(direction, 1),
+        }
+    }
+}
+
+impl Ray for KnightRay {
+    fn next_space(&mut self, space: UncheckedSpace) -> Option<UncheckedSpace> {
+        self.inner.next_space(space)
+    }
+}
+
+pub fn rays() -> [KnightRay; 8] {
+    let moves: [KnightMove; 8] = Cardinal::ARRAY
+        .map(KnightMove::from_long)
+        .concat()
+        .try_into()
+        .unwrap();
+
+    moves.map(KnightRay::new)
 }

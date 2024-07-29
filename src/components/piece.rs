@@ -53,20 +53,11 @@ impl<'c> Piece<'c> {
                     }
                 }
             }
-            ChessPiece::Knight => {
-                for space in board.check_iter(pieces::knight::moves(self.space.as_unchecked())) {
-                    if let Some(piece) = pieces.by_ref().find(|piece| piece.space == &space) {
-                        if piece.side != self.side {
-                            moves.push(space)
-                        }
-                    } else {
-                        moves.push(space)
-                    }
-                }
-            }
-
-            ChessPiece::Bishop | ChessPiece::Rook | ChessPiece::Queen => {
+            ChessPiece::Knight | ChessPiece::Bishop | ChessPiece::Rook | ChessPiece::Queen => {
                 let rays: Vec<ray::IntoIter> = match self.piece {
+                    ChessPiece::Knight => pieces::knight::rays()
+                        .map(|ray| ray.cast(self.space.as_unchecked()))
+                        .into(),
                     ChessPiece::Bishop => pieces::bishop::rays()
                         .map(|ray| ray.cast(self.space.as_unchecked()))
                         .into(),

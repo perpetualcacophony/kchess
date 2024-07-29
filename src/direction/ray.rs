@@ -74,6 +74,15 @@ pub struct LimitedRay<Dir> {
     limit: usize,
 }
 
+impl<Dir> LimitedRay<Dir> {
+    pub const fn new(direction: Dir, limit: usize) -> Self {
+        Self {
+            inner: InfiniteRay::new(direction),
+            limit,
+        }
+    }
+}
+
 impl<Dir> Ray for LimitedRay<Dir>
 where
     Dir: Direction,
