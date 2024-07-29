@@ -1,10 +1,7 @@
-use crate::{
-    direction::{Diagonal, Ray},
-    UncheckedSpace,
-};
+use crate::direction::{Diagonal, InfiniteRay};
 
-pub type BishopRay = Ray<Diagonal>;
+pub type BishopRay = InfiniteRay<Diagonal>;
 
-pub fn rays(start: UncheckedSpace) -> [BishopRay; 4] {
-    BishopRay::map_array(start, Diagonal::ARRAY)
+pub fn rays() -> [BishopRay; 4] {
+    BishopRay::map_array(Diagonal::ARRAY)
 }

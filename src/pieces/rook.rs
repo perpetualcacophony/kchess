@@ -1,10 +1,7 @@
-use crate::{
-    direction::{Cardinal, Ray},
-    UncheckedSpace,
-};
+use crate::direction::{Cardinal, InfiniteRay};
 
-pub type RookRay = Ray<Cardinal>;
+pub type RookRay = InfiniteRay<Cardinal>;
 
-pub fn rays(start: UncheckedSpace) -> [RookRay; 4] {
-    RookRay::map_array(start, Cardinal::ARRAY)
+pub fn rays() -> [RookRay; 4] {
+    RookRay::map_array(Cardinal::ARRAY)
 }

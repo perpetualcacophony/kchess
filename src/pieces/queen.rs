@@ -1,4 +1,4 @@
-use crate::UncheckedSpace;
+use crate::{direction::ray::Ray, UncheckedSpace};
 
 use super::{
     bishop::{self, BishopRay},
@@ -22,10 +22,6 @@ impl QueenRay {
             kind: QueenRayKind::Rook(ray),
         }
     }
-
-    pub fn boxed_iter(self) -> Box<dyn Iterator<Item = UncheckedSpace>> {
-        Box::new(self)
-    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -34,21 +30,19 @@ enum QueenRayKind {
     Rook(RookRay),
 }
 
-impl Iterator for QueenRay {
-    type Item = UncheckedSpace;
-
-    fn next(&mut self) -> Option<Self::Item> {
+impl Ray for QueenRay {
+    fn next_space(&mut self, space: UncheckedSpace) -> Option<UncheckedSpace> {
         match self.kind {
-            QueenRayKind::Bishop(ref mut ray) => ray.next(),
-            QueenRayKind::Rook(ref mut ray) => ray.next(),
+            QueenRayKind::Bishop(ref mut ray) => ray.next_space(space),
+            QueenRayKind::Rook(ref mut ray) => ray.next_space(space),
         }
     }
 }
 
-pub fn rays(start: UncheckedSpace) -> [QueenRay; 8] {
+pub fn rays() -> [QueenRay; 8] {
     [
-        bishop::rays(start).map(QueenRay::bishop),
-        rook::rays(start).map(QueenRay::rook),
+        bishop::rays().map(QueenRay::bishop),
+        rook::rays().map(QueenRay::rook),
     ]
     .concat()
     .try_into()

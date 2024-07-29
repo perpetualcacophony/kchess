@@ -8,7 +8,7 @@ pub mod relative;
 pub use relative::Relative;
 
 pub mod ray;
-pub use ray::Ray;
+pub use ray::InfiniteRay;
 
 pub trait Direction: Copy {
     fn opposite(self) -> Self;

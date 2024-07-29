@@ -2,49 +2,87 @@ use super::Direction;
 use crate::UncheckedSpace;
 
 #[derive(Copy, Clone, Debug)]
-pub struct Ray<Dir> {
+pub struct InfiniteRay<Dir> {
     direction: Dir,
-    space: UncheckedSpace,
 }
 
-impl<Dir> Ray<Dir> {
-    pub const fn new(start: UncheckedSpace, direction: Dir) -> Self {
-        Self {
-            direction,
+impl<Dir> InfiniteRay<Dir> {
+    pub const fn new(direction: Dir) -> Self {
+        Self { direction }
+    }
+
+    pub fn map_array<const N: usize>(array: [Dir; N]) -> [Self; N] {
+        array.map(Self::new)
+    }
+
+    pub fn limited(self, limit: usize) -> LimitedRay<Dir> {
+        LimitedRay { limit, inner: self }
+    }
+}
+
+pub trait Ray {
+    fn next_space(&mut self, space: UncheckedSpace) -> Option<UncheckedSpace>;
+
+    fn cast<'a>(self, start: UncheckedSpace) -> IntoIter<'a>
+    where
+        Self: Sized + 'a,
+    {
+        IntoIter {
             space: start,
+            ray: Box::new(self),
         }
     }
 
-    pub fn map_iter(
-        start: UncheckedSpace,
-        directions: impl IntoIterator<Item = Dir>,
-    ) -> impl Iterator<Item = Self> {
-        directions
-            .into_iter()
-            .map(move |direction| Self::new(start, direction))
-    }
-
-    pub fn map_array<const N: usize>(start: UncheckedSpace, array: [Dir; N]) -> [Self; N] {
-        array.map(|direction| Self::new(start, direction))
-    }
-
-    pub fn boxed_iter(self) -> Box<dyn Iterator<Item = UncheckedSpace>>
+    fn boxed<'a>(self) -> Box<dyn Ray + 'a>
     where
-        Dir: Direction + 'static,
+        Self: Sized + 'a,
     {
         Box::new(self)
     }
 }
 
-impl<Dir> Iterator for Ray<Dir>
+impl<Dir> Ray for InfiniteRay<Dir>
 where
     Dir: Direction,
 {
+    fn next_space(&mut self, space: UncheckedSpace) -> Option<UncheckedSpace> {
+        Some(space.step(self.direction))
+    }
+}
+
+pub struct IntoIter<'a> {
+    space: UncheckedSpace,
+    ray: Box<dyn Ray + 'a>,
+}
+
+impl<'a> Iterator for IntoIter<'a> {
     type Item = UncheckedSpace;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let item = self.space;
-        self.space.step_in_place(self.direction);
-        Some(item)
+        let item = self.ray.next_space(self.space);
+
+        if let Some(next_space) = item {
+            self.space = next_space;
+        }
+
+        item
+    }
+}
+
+pub struct LimitedRay<Dir> {
+    inner: InfiniteRay<Dir>,
+    limit: usize,
+}
+
+impl<Dir> Ray for LimitedRay<Dir>
+where
+    Dir: Direction,
+{
+    fn next_space(&mut self, space: UncheckedSpace) -> Option<UncheckedSpace> {
+        if self.limit == 0 {
+            None
+        } else {
+            self.inner.next_space(space)
+        }
     }
 }

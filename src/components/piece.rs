@@ -1,4 +1,7 @@
-use crate::{pieces, Board, ChessPiece, ChessSide, Space};
+use crate::{
+    direction::ray::{self, Ray},
+    pieces, Board, ChessPiece, ChessSide, Space,
+};
 
 use crate::game;
 
@@ -63,23 +66,22 @@ impl<'c> Piece<'c> {
             }
 
             ChessPiece::Bishop | ChessPiece::Rook | ChessPiece::Queen => {
-                let rays: Vec<Box<dyn Iterator<Item = Space> + '_>> = match self.piece {
-                    ChessPiece::Bishop => pieces::bishop::rays(self.space.as_unchecked())
-                        .map(|ray| board.check_iter(ray))
-                        .map(|iter| Box::new(iter) as Box<dyn Iterator<Item = Space>>)
+                let rays: Vec<ray::IntoIter> = match self.piece {
+                    ChessPiece::Bishop => pieces::bishop::rays()
+                        .map(|ray| ray.cast(self.space.as_unchecked()))
                         .into(),
-                    ChessPiece::Rook => pieces::rook::rays(self.space.as_unchecked())
-                        .map(|ray| board.check_iter(ray))
-                        .map(|iter| Box::new(iter) as Box<dyn Iterator<Item = Space>>)
+                    ChessPiece::Rook => pieces::rook::rays()
+                        .map(|ray| ray.cast(self.space.as_unchecked()))
                         .into(),
-                    ChessPiece::Queen => pieces::queen::rays(self.space.as_unchecked())
-                        .map(|ray| board.check_iter(ray))
-                        .map(|iter| Box::new(iter) as Box<dyn Iterator<Item = Space>>)
+                    ChessPiece::Queen => pieces::queen::rays()
+                        .map(|ray| ray.cast(self.space.as_unchecked()))
                         .into(),
                     _ => unreachable!(),
                 };
 
-                for mut ray in rays {
+                for ray in rays {
+                    let mut ray = board.check_iter(ray);
+
                     loop {
                         if let Some(space) = ray.next() {
                             if let Some(piece) = pieces.by_ref().find(|piece| piece.space == &space)
