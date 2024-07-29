@@ -14,10 +14,6 @@ impl<Dir> InfiniteRay<Dir> {
     pub fn map_array<const N: usize>(array: [Dir; N]) -> [Self; N] {
         array.map(Self::new)
     }
-
-    pub fn limited(self, limit: usize) -> LimitedRay<Dir> {
-        LimitedRay { limit, inner: self }
-    }
 }
 
 pub trait Ray {
@@ -38,6 +34,13 @@ pub trait Ray {
         Self: Sized + 'a,
     {
         Box::new(self)
+    }
+
+    fn limited(self, limit: usize) -> LimitedRay<Self>
+    where
+        Self: Sized,
+    {
+        LimitedRay { inner: self, limit }
     }
 }
 
@@ -69,12 +72,12 @@ impl<'a> Iterator for IntoIter<'a> {
     }
 }
 
-pub struct LimitedRay<Dir> {
-    inner: InfiniteRay<Dir>,
+pub struct LimitedRay<R> {
+    inner: R,
     limit: usize,
 }
 
-impl<Dir> LimitedRay<Dir> {
+impl<Dir> LimitedRay<InfiniteRay<Dir>> {
     pub const fn new(direction: Dir, limit: usize) -> Self {
         Self {
             inner: InfiniteRay::new(direction),
@@ -83,10 +86,7 @@ impl<Dir> LimitedRay<Dir> {
     }
 }
 
-impl<Dir> Ray for LimitedRay<Dir>
-where
-    Dir: Direction,
-{
+impl<R: Ray> Ray for LimitedRay<R> {
     fn next_space(&mut self, space: UncheckedSpace) -> Option<UncheckedSpace> {
         if self.limit == 0 {
             None

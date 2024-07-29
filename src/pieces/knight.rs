@@ -1,7 +1,7 @@
 use crate::{
     direction::{
         ray::{LimitedRay, Ray},
-        Cardinal,
+        Cardinal, InfiniteRay,
     },
     Direction, UncheckedSpace,
 };
@@ -51,7 +51,7 @@ impl Direction for KnightMove {
 }
 
 pub struct KnightRay {
-    inner: LimitedRay<KnightMove>,
+    inner: LimitedRay<InfiniteRay<KnightMove>>,
 }
 
 impl KnightRay {
