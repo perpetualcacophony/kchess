@@ -55,3 +55,43 @@ pub const SOUTH: &DirectionSingle = &DirectionSingle::new([Cardinal::SOUTH]);
 pub const WEST: &DirectionSingle = &DirectionSingle::new([Cardinal::WEST]);
 
 pub const ARRAY: [&DirectionSingle; 4] = [NORTH, EAST, SOUTH, WEST];
+
+#[cfg(test)]
+mod tests {
+    #[macro_use]
+    mod macros;
+
+    use super::Cardinal;
+
+    mod perpendicular {
+        assert_perpendicular_to! {
+            NORTH {
+                NORTH false
+                EAST true
+                SOUTH false
+                WEST true
+            }
+
+            EAST {
+                NORTH false
+                EAST true
+                SOUTH false
+                WEST true
+            }
+
+            SOUTH {
+                NORTH false
+                EAST true
+                SOUTH false
+                WEST true
+            }
+
+            WEST {
+                NORTH false
+                EAST true
+                SOUTH false
+                WEST true
+            }
+        }
+    }
+}

@@ -10,3 +10,6 @@ rand = { version = "0.8.5", optional = true, default-features = false }
 default = []
 rand = ["dep:rand"]
 rand_full = ["rand", "rand/std", "rand/std_rng"]
+
+[dev-dependencies]
+paste = "1.0.15"
