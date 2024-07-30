@@ -3,7 +3,7 @@ use crate::UncheckedSpace;
 
 pub type RayStatic<Direction> = Ray<&'static Direction>;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Ray<Direction = DirectionStruct> {
     limit: Option<usize>,
     direction: Direction,

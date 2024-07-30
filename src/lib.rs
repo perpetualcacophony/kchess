@@ -5,7 +5,6 @@ pub mod space;
 pub use space::{Space, UncheckedSpace};
 
 pub mod direction;
-pub use direction::Direction;
 
 pub mod components;
 pub use components::Components;

@@ -1,4 +1,4 @@
-use super::{Direction, DirectionSingle};
+use super::DirectionSingle;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Cardinal {
@@ -37,28 +37,6 @@ impl Cardinal {
             Self::East => Self::WEST,
             Self::South => Self::NORTH,
             Self::West => Self::EAST,
-        }
-    }
-}
-
-impl Direction for Cardinal {
-    fn opposite(self) -> Self {
-        match self {
-            Self::North => Self::South,
-            Self::East => Self::West,
-            Self::South => Self::North,
-            Self::West => Self::East,
-        }
-    }
-
-    fn next_space(self, start: crate::UncheckedSpace) -> crate::UncheckedSpace {
-        start.cardinal(self)
-    }
-
-    fn perpendicular(self) -> [Self; 2] {
-        match self {
-            Self::North | Self::South => [Self::East, Self::West],
-            Self::East | Self::West => [Self::North, Self::South],
         }
     }
 }

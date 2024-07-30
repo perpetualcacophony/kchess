@@ -4,57 +4,10 @@ pub use cardinal::Cardinal;
 
 pub mod diagonal;
 
-pub mod relative;
-pub use relative::Relative;
-
 pub mod ray;
 pub use ray::Ray;
 
 use crate::{ChessSide, UncheckedSpace};
-
-pub trait Direction {
-    fn opposite(self) -> Self;
-    fn next_space(self, start: crate::UncheckedSpace) -> crate::UncheckedSpace;
-    fn perpendicular(self) -> [Self; 2]
-    where
-        Self: std::marker::Sized;
-}
-
-#[derive(Clone, Copy, Debug)]
-pub enum DirectionUnion<A, B> {
-    A(A),
-    B(B),
-}
-
-impl<A, B> Direction for DirectionUnion<A, B>
-where
-    A: Direction,
-    B: Direction,
-{
-    fn next_space(self, start: crate::UncheckedSpace) -> crate::UncheckedSpace {
-        match self {
-            Self::A(direction) => direction.next_space(start),
-            Self::B(direction) => direction.next_space(start),
-        }
-    }
-
-    fn opposite(self) -> Self {
-        match self {
-            Self::A(direction) => Self::A(direction.opposite()),
-            Self::B(direction) => Self::B(direction.opposite()),
-        }
-    }
-
-    fn perpendicular(self) -> [Self; 2]
-    where
-        Self: std::marker::Sized,
-    {
-        match self {
-            Self::A(direction) => direction.perpendicular().map(Self::A),
-            Self::B(direction) => direction.perpendicular().map(Self::B),
-        }
-    }
-}
 
 pub type DirectionSingle = DirectionArray<1>;
 
