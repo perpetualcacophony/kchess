@@ -1,10 +1,10 @@
-use crate::{pieces::ChessPieceStruct, Board, ChessSide, Space};
+use crate::{pieces::ChessPiece, Board, ChessSide, Space};
 
 bundle! {
     mut PieceMut
     moved: bool,
     space: Space,
-    piece: ChessPieceStruct,
+    piece: ChessPiece,
     side: ChessSide,
     captured: bool
 }
@@ -13,7 +13,7 @@ impl<'c> PieceMut<'c> {
     pub fn capture(&mut self) {}
 
     pub fn promote(&mut self) {
-        *self.piece = ChessPieceStruct::queen();
+        *self.piece = ChessPiece::queen();
     }
 
     pub fn move_to(

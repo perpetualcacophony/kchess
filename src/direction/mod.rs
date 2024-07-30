@@ -32,7 +32,7 @@ impl<const N: usize> DirectionArray<N> {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Direction<Collection = Vec<Cardinal>> {
     cardinals: Collection,
 }
