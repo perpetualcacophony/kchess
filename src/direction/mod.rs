@@ -11,7 +11,7 @@ use crate::{ChessSide, UncheckedSpace};
 
 pub type DirectionSingle = DirectionArray<1>;
 
-pub type DirectionArray<const N: usize> = DirectionStruct<[Cardinal; N]>;
+pub type DirectionArray<const N: usize> = Direction<[Cardinal; N]>;
 
 impl DirectionArray<2> {
     pub const fn double(a: Cardinal, b: Cardinal) -> Self {
@@ -33,31 +33,31 @@ impl<const N: usize> DirectionArray<N> {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct DirectionStruct<Collection = Vec<Cardinal>> {
+pub struct Direction<Collection = Vec<Cardinal>> {
     cardinals: Collection,
 }
 
-impl<C> DirectionStruct<C> {
+impl<C> Direction<C> {
     pub const fn new(cardinals: C) -> Self {
         Self { cardinals }
     }
 
-    pub fn into_vec(self) -> DirectionStruct<Vec<Cardinal>>
+    pub fn into_vec(self) -> Direction<Vec<Cardinal>>
     where
         C: Into<Vec<Cardinal>>,
     {
-        DirectionStruct::new(self.cardinals.into())
+        Direction::new(self.cardinals.into())
     }
 
-    pub fn map<C2, F>(self, f: F) -> DirectionStruct<C2>
+    pub fn map<C2, F>(self, f: F) -> Direction<C2>
     where
         F: FnOnce(C) -> C2,
     {
-        DirectionStruct::new(f(self.cardinals))
+        Direction::new(f(self.cardinals))
     }
 }
 
-impl<'a, C: 'a> DirectionStruct<C>
+impl<'a, C: 'a> Direction<C>
 where
     &'a C: IntoIterator<Item = &'a Cardinal>,
 {
@@ -78,7 +78,7 @@ where
     }
 }
 
-impl<C> DirectionStruct<C>
+impl<C> Direction<C>
 where
     Self: FromIterator<Cardinal>,
 {
@@ -99,7 +99,7 @@ where
     }
 }
 
-impl<'a, C: 'a> DirectionStruct<C>
+impl<'a, C: 'a> Direction<C>
 where
     Self: FromIterator<Cardinal>,
     &'a C: IntoIterator<Item = &'a Cardinal>,
@@ -122,7 +122,7 @@ where
 
 pub type Iter<'a, I> = std::iter::Copied<<&'a I as IntoIterator>::IntoIter>;
 
-impl<C> FromIterator<Cardinal> for DirectionStruct<C>
+impl<C> FromIterator<Cardinal> for Direction<C>
 where
     C: FromIterator<Cardinal>,
 {

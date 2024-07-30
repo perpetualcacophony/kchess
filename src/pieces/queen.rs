@@ -1,6 +1,6 @@
-use crate::direction::{self, cardinal, diagonal, Cardinal, DirectionStruct, Ray};
+use crate::direction::{self, cardinal, diagonal, Cardinal, Direction, Ray};
 
-pub type QueenDirection = DirectionStruct<direction::OneOrTwo<Cardinal>>;
+pub type QueenDirection = Direction<direction::OneOrTwo<Cardinal>>;
 
 pub fn directions() -> [QueenDirection; 8] {
     [

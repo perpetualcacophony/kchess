@@ -1,4 +1,4 @@
-use crate::direction::{Cardinal, DirectionStruct};
+use crate::direction::{Cardinal, Direction};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Space {
@@ -56,14 +56,14 @@ impl UncheckedSpace {
         self
     }
 
-    pub fn step<'a, D>(self, direction: &'a DirectionStruct<D>) -> Self
+    pub fn step<'a, D>(self, direction: &'a Direction<D>) -> Self
     where
         &'a D: IntoIterator<Item = &'a Cardinal>,
     {
         direction.next_space(self)
     }
 
-    pub fn step_in_place<'a, D>(&mut self, direction: &'a DirectionStruct<D>)
+    pub fn step_in_place<'a, D>(&mut self, direction: &'a Direction<D>)
     where
         &'a D: IntoIterator<Item = &'a Cardinal>,
     {

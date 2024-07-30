@@ -1,12 +1,12 @@
-use super::{Cardinal, DirectionStruct};
+use super::{Cardinal, Direction};
 use crate::UncheckedSpace;
 
-pub type RayStatic<Direction> = Ray<&'static Direction>;
+pub type RayStatic<Dir> = Ray<&'static Dir>;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub struct Ray<Direction = DirectionStruct> {
+pub struct Ray<Dir = Direction> {
     limit: Option<usize>,
-    direction: Direction,
+    direction: Dir,
 }
 
 impl<D> Ray<D> {
@@ -31,7 +31,7 @@ impl<D> Ray<D> {
     }
 }
 
-impl<C> Ray<DirectionStruct<C>>
+impl<C> Ray<Direction<C>>
 where
     C: Into<Vec<Cardinal>>,
 {
@@ -43,10 +43,10 @@ where
     }
 }
 
-impl<C> RayStatic<DirectionStruct<C>>
+impl<C> RayStatic<Direction<C>>
 where
     C: Into<Vec<Cardinal>>,
-    DirectionStruct<C>: Copy,
+    Direction<C>: Copy,
 {
     pub fn into_vec(self) -> Ray {
         Ray {
@@ -56,7 +56,7 @@ where
     }
 }
 
-impl<C> Ray<DirectionStruct<C>> {
+impl<C> Ray<Direction<C>> {
     pub fn cast(&self, start: UncheckedSpace) -> impl Iterator<Item = UncheckedSpace> + '_
     where
         Self: Clone,
