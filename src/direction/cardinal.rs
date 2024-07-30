@@ -73,10 +73,10 @@ mod tests {
             }
 
             EAST {
-                NORTH false
-                EAST true
-                SOUTH false
-                WEST true
+                NORTH true
+                EAST false
+                SOUTH true
+                WEST false
             }
 
             SOUTH {
@@ -87,10 +87,10 @@ mod tests {
             }
 
             WEST {
-                NORTH false
-                EAST true
-                SOUTH false
-                WEST true
+                NORTH true
+                EAST false
+                SOUTH true
+                WEST false
             }
         }
     }
