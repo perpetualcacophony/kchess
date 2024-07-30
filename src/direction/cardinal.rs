@@ -24,11 +24,11 @@ impl Cardinal {
     }
 
     pub const fn perpendicular_to(self, rhs: Self) -> bool {
-        match (self, rhs) {
+        matches!(
+            (self, rhs),
             (Self::North | Self::South, Self::East | Self::West)
-            | (Self::East | Self::West, Self::North | Self::South) => true,
-            _ => false,
-        }
+                | (Self::East | Self::West, Self::North | Self::South)
+        )
     }
 
     pub const fn opposite(self) -> Self {

@@ -1,7 +1,4 @@
-use crate::{
-    direction::{Cardinal, DirectionStruct},
-    Direction,
-};
+use crate::direction::{Cardinal, DirectionStruct};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Space {

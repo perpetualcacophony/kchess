@@ -1,4 +1,4 @@
-use crate::{pieces::ChessPieceStruct, ChessPiece, ChessSide, Space};
+use crate::{pieces::ChessPieceStruct, ChessSide, Space};
 
 #[macro_use]
 mod macros;

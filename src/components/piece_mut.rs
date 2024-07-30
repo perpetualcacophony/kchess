@@ -1,4 +1,4 @@
-use crate::{pieces::ChessPieceStruct, Board, ChessPiece, ChessSide, Space};
+use crate::{pieces::ChessPieceStruct, Board, ChessSide, Space};
 
 bundle! {
     mut PieceMut

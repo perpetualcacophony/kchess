@@ -1,10 +1,6 @@
 use crate::{
-    direction::{
-        self,
-        ray::{Ray, RayStatic},
-        Cardinal, Diagonal, DirectionArray, DirectionSingle, DirectionStruct, OneOrTwo, Relative,
-    },
-    ChessSide, UncheckedSpace,
+    direction::{self, ray::Ray, DirectionArray, DirectionSingle},
+    ChessSide,
 };
 
 /* pub fn captures(side: ChessSide, start: UncheckedSpace) -> [UncheckedSpace; 2] {

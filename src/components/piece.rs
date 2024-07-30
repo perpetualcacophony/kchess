@@ -34,7 +34,7 @@ impl<'c> Piece<'c> {
 
                 loop {
                     if let Some(space) = ray.next() {
-                        if let Some(piece) = pieces.by_ref().find(|piece| piece.space == &space) {
+                        if pieces.by_ref().any(|piece| piece.space == &space) {
                             break;
                         } else {
                             moves.push(space)

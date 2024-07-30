@@ -1,14 +1,6 @@
-use std::usize;
-
-use queen::QueenDirection;
-
 use crate::{
-    direction::{
-        ray::{Ray, RayStatic},
-        Cardinal, Diagonal, Relative,
-    },
-    game::AllPieces,
-    Board, ChessSide, Space, UncheckedSpace,
+    direction::ray::{Ray, RayStatic},
+    ChessSide,
 };
 
 pub mod pawn;

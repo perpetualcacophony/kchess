@@ -3,7 +3,6 @@ pub mod cardinal;
 pub use cardinal::Cardinal;
 
 pub mod diagonal;
-pub use diagonal::Diagonal;
 
 pub mod relative;
 pub use relative::Relative;
@@ -73,7 +72,7 @@ impl<const N: usize> DirectionArray<N> {
         Self: Clone,
     {
         if side == ChessSide::White {
-            self.clone()
+            *self
         } else {
             Self::new(self.cardinals.map(Cardinal::opposite))
         }
@@ -117,6 +116,7 @@ where
         self.iter().fold(start, UncheckedSpace::cardinal)
     }
 
+    #[allow(clippy::len_without_is_empty)]
     pub fn len(&'a self) -> usize
     where
         for<'b> Iter<'b, C>: ExactSizeIterator,
@@ -167,10 +167,7 @@ where
     }
 }
 
-pub type Iter<'a, I>
-where
-    &'a I: IntoIterator<Item = &'a Cardinal>,
-= std::iter::Copied<<&'a I as IntoIterator>::IntoIter>;
+pub type Iter<'a, I> = std::iter::Copied<<&'a I as IntoIterator>::IntoIter>;
 
 impl<C> FromIterator<Cardinal> for DirectionStruct<C>
 where
