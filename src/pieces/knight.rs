@@ -1,12 +1,9 @@
 use crate::{
-    direction::{
-        ray::{LimitedRay, Ray},
-        Cardinal, InfiniteRay,
-    },
+    direction::{cardinal, ray::Ray, Cardinal, DirectionArray},
     Direction, UncheckedSpace,
 };
 
-#[derive(Copy, Debug, Clone)]
+/* #[derive(Copy, Debug, Clone)]
 pub struct KnightMove {
     long: Cardinal,
     short: Cardinal,
@@ -26,6 +23,10 @@ impl KnightMove {
     pub fn next_space(self, start: UncheckedSpace) -> UncheckedSpace {
         start.step(self.long).step(self.long).step(self.short)
     }
+
+    pub fn opposite(&self) -> Self {
+        Self::new(!self.long, !self.short)
+    }
 }
 
 pub fn moves(start: UncheckedSpace) -> [UncheckedSpace; 8] {
@@ -42,38 +43,34 @@ impl Direction for KnightMove {
     }
 
     fn opposite(self) -> Self {
-        Self::new(!self.long, !self.short)
+        Self::opposite(&self)
     }
 
     fn perpendicular(self) -> [Self; 2] {
         todo!()
     }
 }
-
-pub struct KnightRay {
-    inner: LimitedRay<InfiniteRay<KnightMove>>,
+ */
+pub fn from_long(long: Cardinal) -> [DirectionArray<3>; 2] {
+    long.perpendicular().map(|cardinal| new(long, cardinal))
 }
 
-impl KnightRay {
-    pub const fn new(direction: KnightMove) -> Self {
-        Self {
-            inner: LimitedRay::new(direction, 1),
-        }
-    }
+pub fn new(long: Cardinal, short: Cardinal) -> DirectionArray<3> {
+    assert!(long.perpendicular_to(short));
+
+    DirectionArray::new([long, long, short])
 }
 
-impl Ray for KnightRay {
-    fn next_space(&mut self, space: UncheckedSpace) -> Option<UncheckedSpace> {
-        self.inner.next_space(space)
-    }
-}
-
-pub fn rays() -> [KnightRay; 8] {
-    let moves: [KnightMove; 8] = Cardinal::ARRAY
-        .map(KnightMove::from_long)
+pub fn directions() -> [DirectionArray<3>; 8] {
+    Cardinal::ARRAY
+        .map(|cardinal| from_long(cardinal))
         .concat()
         .try_into()
-        .unwrap();
+        .unwrap()
+}
 
-    moves.map(KnightRay::new)
+pub type KnightRay = Ray<DirectionArray<3>>;
+
+pub fn rays() -> [KnightRay; 8] {
+    directions().map(KnightRay::once)
 }

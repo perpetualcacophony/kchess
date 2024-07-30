@@ -1,4 +1,4 @@
-use super::{Cardinal, Direction};
+use super::{Cardinal, Direction, DirectionArray, DirectionStruct};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Diagonal {
@@ -38,6 +38,10 @@ impl Diagonal {
 
         [north_south, east_west]
     }
+
+    const fn opposite(&self) -> Self {
+        Self::new(!self.north, !self.east)
+    }
 }
 
 impl std::ops::Not for Diagonal {
@@ -50,7 +54,7 @@ impl std::ops::Not for Diagonal {
 
 impl Direction for Diagonal {
     fn opposite(self) -> Self {
-        Self::new(!self.north, !self.east)
+        !self
     }
 
     fn next_space(self, start: crate::UncheckedSpace) -> crate::UncheckedSpace {
@@ -66,3 +70,30 @@ impl Direction for Diagonal {
         ]
     }
 }
+
+pub fn try_new(a: Cardinal, b: Cardinal) -> Option<DirectionArray<2>> {
+    a.perpendicular_to(b).then(|| DirectionArray::double(a, b))
+}
+
+pub const fn new(a: Cardinal, b: Cardinal) -> DirectionArray<2> {
+    DirectionArray::double(a, b)
+}
+
+pub const fn new_ne(north: bool, east: bool) -> DirectionArray<2> {
+    let north_south = if north {
+        Cardinal::NORTH
+    } else {
+        Cardinal::SOUTH
+    };
+
+    let east_west = if east { Cardinal::EAST } else { Cardinal::WEST };
+
+    new(north_south, east_west)
+}
+
+pub const NORTHEAST: &DirectionArray<2> = &new_ne(true, true);
+pub const SOUTHEAST: &DirectionArray<2> = &new_ne(false, true);
+pub const SOUTHWEST: &DirectionArray<2> = &new_ne(false, false);
+pub const NORTHWEST: &DirectionArray<2> = &new_ne(true, false);
+
+pub const ARRAY: [&DirectionArray<2>; 4] = [NORTHEAST, SOUTHEAST, SOUTHWEST, NORTHWEST];

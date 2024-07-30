@@ -1,6 +1,15 @@
 use std::usize;
 
-use crate::{direction::ray::Ray, ChessSide};
+use queen::QueenDirection;
+
+use crate::{
+    direction::{
+        ray::{Ray, RayStatic},
+        Cardinal, Diagonal, Relative,
+    },
+    game::AllPieces,
+    Board, ChessSide, Space, UncheckedSpace,
+};
 
 pub mod pawn;
 
@@ -53,79 +62,129 @@ pub enum PromotionOptions {
     Queen,
 }
 
+#[derive(Clone, Debug)]
 pub struct ChessPieceStruct {
-    value: usize,
-    can_promote: bool,
-    valid_promotion: bool,
-    checkmate_possible: bool,
-    rays: Vec<Box<dyn Ray>>,
-    capture_rays: Option<Vec<Box<dyn Ray>>>,
+    pub value: usize,
+    pub can_promote: bool,
+    pub valid_promotion: bool,
+    pub checkmate_possible: bool,
+    pub rays: Vec<Ray>,
+    pub capture_rays: Option<Vec<Ray>>,
 }
 
 impl ChessPieceStruct {
-    pub fn pawn(side: ChessSide, moved: bool) -> Self {
-        Self {
+    pub fn pawn(side: ChessSide, moved: bool) -> ChessPieceStruct {
+        ChessPieceStruct {
             value: 1,
             can_promote: true,
             valid_promotion: false,
             checkmate_possible: false,
-            rays: vec![pawn::step_ray(side, moved).boxed()],
-            capture_rays: Some(pawn::capture_rays(side).map(Ray::boxed).into()),
+            rays: vec![pawn::step_ray(side, moved).into_vec()],
+            capture_rays: Some(pawn::capture_rays(side).map(|ray| ray.into_vec()).to_vec()),
         }
     }
 
-    pub fn knight() -> Self {
-        Self {
+    pub fn knight() -> ChessPieceStruct {
+        ChessPieceStruct {
             value: 3,
             can_promote: false,
             valid_promotion: true,
             checkmate_possible: false,
-            rays: knight::rays().map(Ray::boxed).into(),
+            rays: knight::rays().map(|ray| ray.into_vec()).to_vec(),
             capture_rays: None,
         }
     }
 
-    pub fn bishop() -> Self {
-        Self {
+    pub fn bishop() -> ChessPieceStruct {
+        ChessPieceStruct {
             value: 3,
             can_promote: false,
             valid_promotion: true,
             checkmate_possible: false,
-            rays: bishop::rays().map(Ray::boxed).into(),
+            rays: bishop::rays().map(RayStatic::into_vec).to_vec(),
             capture_rays: None,
         }
     }
 
-    pub fn rook() -> Self {
-        Self {
+    pub fn rook() -> ChessPieceStruct {
+        ChessPieceStruct {
             value: 5,
             can_promote: false,
             valid_promotion: true,
             checkmate_possible: false,
-            rays: rook::rays().map(Ray::boxed).into(),
+            rays: rook::rays().map(RayStatic::into_vec).to_vec(),
             capture_rays: None,
         }
     }
 
-    pub fn queen() -> Self {
-        Self {
+    pub fn queen() -> ChessPieceStruct {
+        ChessPieceStruct {
             value: 9,
             can_promote: false,
             valid_promotion: true,
             checkmate_possible: false,
-            rays: queen::rays().map(Ray::boxed).into(),
+            rays: queen::rays().map(|ray| ray.into_vec()).to_vec(),
             capture_rays: None,
         }
     }
 
-    pub fn king() -> Self {
-        Self {
+    pub fn king() -> ChessPieceStruct {
+        ChessPieceStruct {
             value: usize::MAX,
             can_promote: false,
             valid_promotion: false,
             checkmate_possible: true,
-            rays: king::rays().map(Ray::boxed).into(),
+            rays: king::rays().map(|ray| ray.into_vec()).to_vec(),
             capture_rays: None,
         }
     }
 }
+
+/* pub trait PieceTrait {
+    const VALUE: usize;
+    const CAN_PROMOTE: bool = false;
+    const VALID_PROMOTION: bool = true;
+    const CHECKMATE_POSSIBLE: bool = false;
+}
+
+pub struct Pawn;
+
+pub struct Knight;
+
+impl PieceTrait for Knight {
+    const VALUE: usize = 3;
+
+    fn rays(&self) -> impl Iterator<Item = Self::Ray> {
+        knight::rays().into_iter()
+    }
+}
+
+pub struct Bishop;
+
+impl PieceTrait for Bishop {
+    type Ray = bishop::BishopRay;
+
+    const VALUE: usize = 3;
+
+    fn rays(&self) -> impl Iterator<Item = Self::Ray> {
+        bishop::rays().into_iter()
+    }
+}
+
+pub enum PieceSet {
+    Knight(Knight),
+    Bishop(Bishop),
+}
+
+impl PieceSet {
+    fn cast(
+        &self,
+        start: UncheckedSpace,
+    ) -> impl Iterator<Item = impl Iterator<Item = UncheckedSpace>> {
+        match self {
+            Self::Knight(knight) => knight.rays().map(|ray| ray.cast(start)),
+            Self::Bishop(bishop) => bishop.rays().map(|ray| ray.cast(start)),
+        }
+    }
+}
+ */

@@ -1,7 +1,7 @@
-use crate::direction::{Diagonal, InfiniteRay};
+use crate::direction::{diagonal, ray::RayStatic, DirectionArray};
 
-pub type BishopRay = InfiniteRay<Diagonal>;
+pub type BishopRay = RayStatic<DirectionArray<2>>;
 
 pub fn rays() -> [BishopRay; 4] {
-    BishopRay::map_array(Diagonal::ARRAY)
+    diagonal::ARRAY.map(BishopRay::no_limit)
 }

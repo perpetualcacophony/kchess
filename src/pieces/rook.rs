@@ -1,7 +1,7 @@
-use crate::direction::{Cardinal, InfiniteRay};
+use crate::direction::{cardinal, ray::RayStatic, DirectionArray};
 
-pub type RookRay = InfiniteRay<Cardinal>;
+pub type RookRay = RayStatic<DirectionArray<1>>;
 
 pub fn rays() -> [RookRay; 4] {
-    RookRay::map_array(Cardinal::ARRAY)
+    cardinal::ARRAY.map(RookRay::no_limit)
 }

@@ -1,97 +1,101 @@
-use super::Direction;
+use super::{Cardinal, DirectionStruct};
 use crate::UncheckedSpace;
 
+pub type RayStatic<Direction> = Ray<&'static Direction>;
+
 #[derive(Copy, Clone, Debug)]
-pub struct InfiniteRay<Dir> {
-    direction: Dir,
+pub struct Ray<Direction = DirectionStruct> {
+    limit: Option<usize>,
+    direction: Direction,
 }
 
-impl<Dir> InfiniteRay<Dir> {
-    pub const fn new(direction: Dir) -> Self {
-        Self { direction }
+impl<D> Ray<D> {
+    pub const fn new(limit: Option<usize>, direction: D) -> Self {
+        Self { limit, direction }
     }
 
-    pub fn map_array<const N: usize>(array: [Dir; N]) -> [Self; N] {
-        array.map(Self::new)
+    pub const fn no_limit(direction: D) -> Self {
+        Self::new(None, direction)
+    }
+
+    pub const fn limited(limit: usize, direction: D) -> Self {
+        Self::new(Some(limit), direction)
+    }
+
+    pub const fn once(direction: D) -> Self {
+        Self::limited(1, direction)
+    }
+
+    pub fn iter(&self) -> Iter<D> {
+        Iter::new(self)
     }
 }
 
-pub trait Ray {
-    fn next_space(&mut self, space: UncheckedSpace) -> Option<UncheckedSpace>;
-
-    fn cast<'a>(self, start: UncheckedSpace) -> IntoIter<'a>
-    where
-        Self: Sized + 'a,
-    {
-        IntoIter {
-            space: start,
-            ray: Box::new(self),
+impl<C> Ray<DirectionStruct<C>>
+where
+    C: Into<Vec<Cardinal>>,
+{
+    pub fn into_vec(self) -> Ray {
+        Ray {
+            limit: self.limit,
+            direction: self.direction.into_vec(),
         }
     }
-
-    fn boxed<'a>(self) -> Box<dyn Ray + 'a>
-    where
-        Self: Sized + 'a,
-    {
-        Box::new(self)
-    }
-
-    fn limited(self, limit: usize) -> LimitedRay<Self>
-    where
-        Self: Sized,
-    {
-        LimitedRay { inner: self, limit }
-    }
 }
 
-impl<Dir> Ray for InfiniteRay<Dir>
+impl<C> RayStatic<DirectionStruct<C>>
 where
-    Dir: Direction,
+    C: Into<Vec<Cardinal>>,
+    DirectionStruct<C>: Copy,
 {
-    fn next_space(&mut self, space: UncheckedSpace) -> Option<UncheckedSpace> {
-        Some(space.step(self.direction))
+    pub fn into_vec(self) -> Ray {
+        Ray {
+            limit: self.limit,
+            direction: (*self.direction).into_vec(),
+        }
     }
 }
 
-pub struct IntoIter<'a> {
-    space: UncheckedSpace,
-    ray: Box<dyn Ray + 'a>,
+impl<C> Ray<DirectionStruct<C>> {
+    pub fn cast(&self, start: UncheckedSpace) -> impl Iterator<Item = UncheckedSpace> + '_
+    where
+        Self: Clone,
+        for<'a> &'a C: IntoIterator<Item = &'a Cardinal>,
+    {
+        self.iter().scan(start, |start, dir| {
+            *start = start.step(dir);
+
+            Some(*start)
+        })
+    }
 }
 
-impl<'a> Iterator for IntoIter<'a> {
-    type Item = UncheckedSpace;
+pub struct Iter<'ray, Dir> {
+    limit: Option<usize>,
+    direction: &'ray Dir,
+}
+
+impl<'ray, Dir> Iter<'ray, Dir> {
+    fn new(ray: &'ray Ray<Dir>) -> Self {
+        Self {
+            limit: ray.limit,
+            direction: &ray.direction,
+        }
+    }
+}
+
+impl<'ray, Dir> Iterator for Iter<'ray, Dir> {
+    type Item = &'ray Dir;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let item = self.ray.next_space(self.space);
-
-        if let Some(next_space) = item {
-            self.space = next_space;
+        if let Some(limit) = self.limit.as_mut() {
+            if *limit == 0 {
+                return None;
+            } else {
+                *limit -= 1;
+            }
         }
 
-        item
-    }
-}
-
-pub struct LimitedRay<R> {
-    inner: R,
-    limit: usize,
-}
-
-impl<Dir> LimitedRay<InfiniteRay<Dir>> {
-    pub const fn new(direction: Dir, limit: usize) -> Self {
-        Self {
-            inner: InfiniteRay::new(direction),
-            limit,
-        }
-    }
-}
-
-impl<R: Ray> Ray for LimitedRay<R> {
-    fn next_space(&mut self, space: UncheckedSpace) -> Option<UncheckedSpace> {
-        if self.limit == 0 {
-            None
-        } else {
-            self.inner.next_space(space)
-        }
+        Some(self.direction)
     }
 }

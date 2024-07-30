@@ -10,7 +10,7 @@ pub struct Side<'c> {
 impl<'c> Side<'c> {
     pub fn material(&self) -> usize {
         self.active_pieces()
-            .fold(0, |total, piece| total + piece.piece.value())
+            .fold(0, |total, piece| total + piece.piece.value)
     }
 
     pub fn active_pieces(&self) -> impl Iterator<Item = &Piece<'c>> {
@@ -19,10 +19,5 @@ impl<'c> Side<'c> {
 
     pub fn advantage(&self, rhs: &Self) -> isize {
         self.material() as isize - rhs.material() as isize
-    }
-
-    pub fn pieces(&self, kind: ChessPiece) -> impl Iterator<Item = &Piece<'c>> {
-        self.active_pieces()
-            .filter(move |piece| piece.piece == &kind)
     }
 }
