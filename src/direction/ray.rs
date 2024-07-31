@@ -16,7 +16,7 @@ impl<'a, Direction> RayBorrowed<'a, Direction> {
     }
 
     pub const fn iter(&self) -> Iter<Direction> {
-        Iter::new(self.limit, &self.direction)
+        Iter::new(self.limit, self.direction)
     }
 
     pub const fn into_iter(self) -> Iter<'a, Direction> {
@@ -65,7 +65,11 @@ impl RayOwned {
     }
 
     pub fn cast(&self, start: UncheckedSpace) -> impl Iterator<Item = UncheckedSpace> + '_ {
-        self.as_borrowed().cast(start)
+        self.iter().scan(start, move |start, dir| {
+            *start = dir.next_space(*start);
+
+            Some(*start)
+        })
     }
 }
 

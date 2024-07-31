@@ -20,13 +20,13 @@ impl<'c> Piece<'c> {
             .piece
             .rays
             .iter()
-            .map(|ray| ray.as_borrowed().cast(self.space.as_unchecked()))
+            .map(|ray| ray.cast(self.space.as_unchecked()))
             .collect();
 
         if let Some(ref capture_rays) = self.piece.capture_rays {
             let capture_rays: Vec<_> = capture_rays
                 .iter()
-                .map(|ray| ray.as_borrowed().cast(self.space.as_unchecked()))
+                .map(|ray| ray.cast(self.space.as_unchecked()))
                 .collect();
 
             for ray in rays {
