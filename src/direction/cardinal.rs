@@ -1,6 +1,6 @@
-use super::DirectionSingle;
+use super::DirectionCardinal;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Cardinal {
     North,
     East,
@@ -15,6 +15,7 @@ impl Cardinal {
     pub const WEST: Self = Self::West;
 
     pub const ARRAY: [Self; 4] = [Self::NORTH, Self::EAST, Self::SOUTH, Self::WEST];
+    pub const SLICE: &[Self] = &[Self::NORTH, Self::EAST, Self::SOUTH, Self::WEST];
 
     pub const fn perpendicular(self) -> [Self; 2] {
         match self {
@@ -39,6 +40,16 @@ impl Cardinal {
             Self::West => Self::EAST,
         }
     }
+
+    pub const fn equal_to(self, rhs: Self) -> bool {
+        matches!(
+            (self, rhs),
+            (Self::North, Self::North)
+                | (Self::East, Self::East)
+                | (Self::South, Self::South)
+                | (Self::West, Self::West)
+        )
+    }
 }
 
 impl std::ops::Not for Cardinal {
@@ -49,12 +60,12 @@ impl std::ops::Not for Cardinal {
     }
 }
 
-pub const NORTH: &DirectionSingle = &DirectionSingle::new([Cardinal::NORTH]);
-pub const EAST: &DirectionSingle = &DirectionSingle::new([Cardinal::EAST]);
-pub const SOUTH: &DirectionSingle = &DirectionSingle::new([Cardinal::SOUTH]);
-pub const WEST: &DirectionSingle = &DirectionSingle::new([Cardinal::WEST]);
+pub const NORTH: &DirectionCardinal = &DirectionCardinal::new(Cardinal::NORTH);
+pub const EAST: &DirectionCardinal = &DirectionCardinal::new(Cardinal::EAST);
+pub const SOUTH: &DirectionCardinal = &DirectionCardinal::new(Cardinal::SOUTH);
+pub const WEST: &DirectionCardinal = &DirectionCardinal::new(Cardinal::WEST);
 
-pub const ARRAY: [&DirectionSingle; 4] = [NORTH, EAST, SOUTH, WEST];
+pub const ARRAY: [&DirectionCardinal; 4] = [NORTH, EAST, SOUTH, WEST];
 
 #[cfg(test)]
 mod tests {

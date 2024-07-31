@@ -1,5 +1,5 @@
 use crate::{
-    direction::ray::{Ray, RayStatic},
+    direction::ray::{RayOwned as Ray, RayStatic},
     ChessSide,
 };
 
@@ -32,8 +32,8 @@ impl ChessPiece {
             can_promote: true,
             valid_promotion: false,
             checkmate_possible: false,
-            rays: vec![pawn::step_ray(side, moved).into_vec()],
-            capture_rays: Some(pawn::capture_rays(side).map(|ray| ray.into_vec()).to_vec()),
+            rays: vec![pawn::step_ray(side, moved)],
+            capture_rays: Some(pawn::capture_rays(side).to_vec()),
         }
     }
 
@@ -43,7 +43,7 @@ impl ChessPiece {
             can_promote: false,
             valid_promotion: true,
             checkmate_possible: false,
-            rays: knight::rays().map(|ray| ray.into_vec()).to_vec(),
+            rays: knight::rays().to_vec(),
             capture_rays: None,
         }
     }
@@ -54,7 +54,7 @@ impl ChessPiece {
             can_promote: false,
             valid_promotion: true,
             checkmate_possible: false,
-            rays: bishop::rays().map(RayStatic::into_vec).to_vec(),
+            rays: bishop::rays().map(RayStatic::into_owned).to_vec(),
             capture_rays: None,
         }
     }
@@ -65,7 +65,7 @@ impl ChessPiece {
             can_promote: false,
             valid_promotion: true,
             checkmate_possible: false,
-            rays: rook::rays().map(RayStatic::into_vec).to_vec(),
+            rays: rook::rays().map(RayStatic::into_owned).to_vec(),
             capture_rays: None,
         }
     }
@@ -76,7 +76,7 @@ impl ChessPiece {
             can_promote: false,
             valid_promotion: true,
             checkmate_possible: false,
-            rays: queen::rays().map(|ray| ray.into_vec()).to_vec(),
+            rays: queen::rays().to_vec(),
             capture_rays: None,
         }
     }
@@ -87,7 +87,7 @@ impl ChessPiece {
             can_promote: false,
             valid_promotion: false,
             checkmate_possible: true,
-            rays: king::rays().map(|ray| ray.into_vec()).to_vec(),
+            rays: king::rays().to_vec(),
             capture_rays: None,
         }
     }

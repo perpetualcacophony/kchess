@@ -1,5 +1,5 @@
 use crate::{
-    direction::{self, ray::Ray, DirectionArray, DirectionSingle},
+    direction::{self, ray::RayOwned, Cardinal, DirectionArray, DirectionCardinal},
     ChessSide,
 };
 
@@ -16,14 +16,23 @@ pub fn steps(side: ChessSide, start: UncheckedSpace) -> [UncheckedSpace; 2] {
     [start.step(forward), start.step(forward).step(forward)]
 } */
 
-pub fn step_ray(side: ChessSide, moved: bool) -> Ray<DirectionSingle> {
+pub fn step_ray(side: ChessSide, moved: bool) -> RayOwned {
     let limit = if moved { 1 } else { 2 };
-    Ray::limited(limit, direction::cardinal::NORTH.relative(side))
+    RayOwned::new(
+        Some(limit),
+        direction::cardinal::NORTH.relative(side).into_owned(),
+    )
 }
 
-pub fn capture_rays(side: ChessSide) -> [Ray<DirectionArray<2>>; 2] {
+pub fn capture_rays(side: ChessSide) -> [RayOwned; 2] {
     [
-        Ray::once(direction::diagonal::NORTHEAST.relative(side)),
-        Ray::once(direction::diagonal::NORTHWEST.relative(side)),
+        RayOwned::new(
+            Some(1),
+            direction::diagonal::NORTHEAST.relative(side).into_owned(),
+        ),
+        RayOwned::new(
+            Some(1),
+            direction::diagonal::NORTHWEST.relative(side).into_owned(),
+        ),
     ]
 }

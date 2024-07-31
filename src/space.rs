@@ -56,17 +56,10 @@ impl UncheckedSpace {
         self
     }
 
-    pub fn step<'a, D>(self, direction: &'a Direction<D>) -> Self
+    pub fn step<Cardinals>(self, direction: &Direction<Cardinals>) -> Self
     where
-        &'a D: IntoIterator<Item = &'a Cardinal>,
+        for<'a> &'a Direction<Cardinals>: IntoIterator<Item = Cardinal>,
     {
         direction.next_space(self)
-    }
-
-    pub fn step_in_place<'a, D>(&mut self, direction: &'a Direction<D>)
-    where
-        &'a D: IntoIterator<Item = &'a Cardinal>,
-    {
-        *self = self.step(direction)
     }
 }

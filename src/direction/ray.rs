@@ -1,91 +1,87 @@
+use std::borrow::{Borrow, Cow};
+
 use super::{Cardinal, Direction};
 use crate::UncheckedSpace;
 
-pub type RayStatic<Dir> = Ray<&'static Dir>;
+pub type RayStatic<Collection> = RayBorrowed<'static, Collection>;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub struct Ray<Dir = Direction> {
+pub struct RayBorrowed<'a, Direction> {
     limit: Option<usize>,
-    direction: Dir,
+    direction: &'a Direction,
 }
 
-impl<D> Ray<D> {
-    pub const fn new(limit: Option<usize>, direction: D) -> Self {
+impl<'a, Direction> RayBorrowed<'a, Direction> {
+    pub const fn new(limit: Option<usize>, direction: &'a Direction) -> Self {
         Self { limit, direction }
     }
 
-    pub const fn no_limit(direction: D) -> Self {
-        Self::new(None, direction)
+    pub const fn iter(&self) -> Iter<Direction> {
+        Iter::new(self.limit, &self.direction)
     }
 
-    pub const fn limited(limit: usize, direction: D) -> Self {
-        Self::new(Some(limit), direction)
-    }
-
-    pub const fn once(direction: D) -> Self {
-        Self::limited(1, direction)
-    }
-
-    pub fn iter(&self) -> Iter<D> {
-        Iter::new(self)
+    pub const fn into_iter(self) -> Iter<'a, Direction> {
+        Iter::new(self.limit, self.direction)
     }
 }
 
-impl<C> Ray<Direction<C>>
-where
-    C: Into<Vec<Cardinal>>,
-{
-    pub fn into_vec(self) -> Ray {
-        Ray {
-            limit: self.limit,
-            direction: self.direction.into_vec(),
-        }
+impl<Collection> RayBorrowed<'_, Direction<Collection>> {
+    pub fn into_owned(self) -> RayOwned
+    where
+        Direction<Collection>: Clone,
+        Collection: Into<Vec<Cardinal>>,
+    {
+        RayOwned::new(self.limit, self.direction.clone().into_owned())
     }
-}
 
-impl<C> RayStatic<Direction<C>>
-where
-    C: Into<Vec<Cardinal>>,
-    Direction<C>: Copy,
-{
-    pub fn into_vec(self) -> Ray {
-        Ray {
-            limit: self.limit,
-            direction: (*self.direction).into_vec(),
-        }
-    }
-}
-
-impl<C> Ray<Direction<C>> {
     pub fn cast(&self, start: UncheckedSpace) -> impl Iterator<Item = UncheckedSpace> + '_
     where
-        Self: Clone,
-        for<'a> &'a C: IntoIterator<Item = &'a Cardinal>,
+        for<'a> &'a Direction<Collection>: IntoIterator<Item = Cardinal>,
     {
-        self.iter().scan(start, |start, dir| {
-            *start = start.step(dir);
+        self.iter().scan(start, move |start, dir| {
+            *start = dir.next_space(*start);
 
             Some(*start)
         })
     }
 }
 
-pub struct Iter<'ray, Dir> {
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct RayOwned {
     limit: Option<usize>,
-    direction: &'ray Dir,
+    direction: Direction,
 }
 
-impl<'ray, Dir> Iter<'ray, Dir> {
-    fn new(ray: &'ray Ray<Dir>) -> Self {
-        Self {
-            limit: ray.limit,
-            direction: &ray.direction,
-        }
+impl RayOwned {
+    pub const fn new(limit: Option<usize>, direction: Direction) -> Self {
+        Self { limit, direction }
+    }
+
+    pub const fn as_borrowed(&self) -> RayBorrowed<Direction> {
+        RayBorrowed::new(self.limit, &self.direction)
+    }
+
+    pub const fn iter(&self) -> Iter<Direction> {
+        self.as_borrowed().into_iter()
+    }
+
+    pub fn cast(&self, start: UncheckedSpace) -> impl Iterator<Item = UncheckedSpace> + '_ {
+        self.as_borrowed().cast(start)
     }
 }
 
-impl<'ray, Dir> Iterator for Iter<'ray, Dir> {
-    type Item = &'ray Dir;
+pub struct Iter<'ray, Direction> {
+    limit: Option<usize>,
+    direction: &'ray Direction,
+}
+
+impl<'a, Direction> Iter<'a, Direction> {
+    const fn new(limit: Option<usize>, direction: &'a Direction) -> Self {
+        Self { limit, direction }
+    }
+}
+
+impl<'ray, Collection> Iterator for Iter<'ray, Direction<Collection>> {
+    type Item = &'ray Direction<Collection>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(limit) = self.limit.as_mut() {
@@ -97,5 +93,31 @@ impl<'ray, Dir> Iterator for Iter<'ray, Dir> {
         }
 
         Some(self.direction)
+    }
+}
+
+pub struct Rays {
+    map: std::collections::HashMap<Direction, Option<usize>>,
+}
+
+impl Rays {
+    pub fn insert(&mut self, direction: Direction, limit: Option<usize>) {
+        self.map.insert(direction, limit);
+    }
+
+    pub fn no_limit(&mut self, direction: Direction) {
+        self.insert(direction, None)
+    }
+
+    pub fn limited(&mut self, direction: Direction, limit: usize) {
+        self.insert(direction, Some(limit))
+    }
+
+    pub fn once(&mut self, direction: Direction) {
+        self.limited(direction, 1)
+    }
+
+    pub fn set_limit(&mut self, direction: &Direction, mut limit: Option<usize>) {
+        self.map.get_mut(direction).replace(&mut limit);
     }
 }
