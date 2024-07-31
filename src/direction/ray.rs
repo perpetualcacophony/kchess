@@ -1,6 +1,9 @@
 use super::{Cardinal, Direction};
 use crate::UncheckedSpace;
 
+mod builder;
+pub use builder::RayBuilder;
+
 pub type RayStatic<Collection> = RayBorrowed<'static, Collection>;
 
 pub struct RayBorrowed<'a, Direction> {
@@ -11,6 +14,10 @@ pub struct RayBorrowed<'a, Direction> {
 impl<'a, Direction> RayBorrowed<'a, Direction> {
     pub const fn new(limit: Option<usize>, direction: &'a Direction) -> Self {
         Self { limit, direction }
+    }
+
+    pub const fn from_builder(builder: RayBuilder<&'a Direction>) -> Self {
+        Self::new(builder.limit, builder.direction)
     }
 
     pub const fn iter(&self) -> Iter<Direction> {
@@ -52,6 +59,10 @@ pub struct RayOwned {
 impl RayOwned {
     pub const fn new(limit: Option<usize>, direction: Direction) -> Self {
         Self { limit, direction }
+    }
+
+    pub fn from_builder(builder: RayBuilder) -> Self {
+        Self::new(builder.limit, builder.direction)
     }
 
     pub const fn as_borrowed(&self) -> RayBorrowed<Direction> {
@@ -99,24 +110,8 @@ pub struct Rays {
 }
 
 impl Rays {
-    pub fn insert(&mut self, direction: Direction, limit: Option<usize>) {
-        self.map.insert(direction, limit);
-    }
-
-    pub fn no_limit(&mut self, direction: Direction) {
-        self.insert(direction, None)
-    }
-
-    pub fn limited(&mut self, direction: Direction, limit: usize) {
-        self.insert(direction, Some(limit))
-    }
-
-    pub fn once(&mut self, direction: Direction) {
-        self.limited(direction, 1)
-    }
-
-    pub fn set_limit(&mut self, direction: &Direction, mut limit: Option<usize>) {
-        self.map.get_mut(direction).replace(&mut limit);
+    pub fn insert(&mut self, builder: RayBuilder) {
+        self.map.insert(builder.direction, builder.limit);
     }
 
     pub fn rays(&self) -> impl Iterator<Item = RayBorrowed<Direction>> {
