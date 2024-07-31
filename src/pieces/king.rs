@@ -1,6 +1,6 @@
-use crate::direction::{ray::RayOwned, Cardinal, OneOrTwo};
+use crate::direction::ray::RayOwned;
 
-use super::queen::{self, QueenDirection};
+use super::queen;
 
 pub type KingRay = RayOwned;
 

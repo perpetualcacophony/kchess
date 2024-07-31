@@ -1,5 +1,5 @@
 use crate::{
-    direction::{self, ray::RayOwned, Cardinal, DirectionArray, DirectionCardinal},
+    direction::{self, ray::RayOwned},
     ChessSide,
 };
 

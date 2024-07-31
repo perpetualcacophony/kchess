@@ -1,4 +1,4 @@
-use crate::direction::{diagonal, ray::RayStatic, Cardinal, DirectionArray, DirectionDiagonal};
+use crate::direction::{diagonal, ray::RayStatic, DirectionDiagonal};
 
 pub type BishopRay = RayStatic<DirectionDiagonal>;
 

@@ -1,5 +1,3 @@
-use std::borrow::{Borrow, Cow};
-
 use super::{Cardinal, Direction};
 use crate::UncheckedSpace;
 
