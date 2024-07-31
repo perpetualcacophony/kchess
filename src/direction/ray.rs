@@ -24,7 +24,7 @@ impl<'a, Direction> RayBorrowed<'a, Direction> {
     }
 }
 
-impl<Collection> RayBorrowed<'_, Direction<Collection>> {
+impl<'a, Collection> RayBorrowed<'a, Direction<Collection>> {
     pub fn into_owned(self) -> RayOwned
     where
         Direction<Collection>: Clone,
@@ -33,11 +33,11 @@ impl<Collection> RayBorrowed<'_, Direction<Collection>> {
         RayOwned::new(self.limit, self.direction.clone().into_owned())
     }
 
-    pub fn cast(&self, start: UncheckedSpace) -> impl Iterator<Item = UncheckedSpace> + '_
+    pub fn cast(self, start: UncheckedSpace) -> impl Iterator<Item = UncheckedSpace> + 'a
     where
-        for<'a> &'a Direction<Collection>: IntoIterator<Item = Cardinal>,
+        for<'b> &'b Direction<Collection>: IntoIterator<Item = Cardinal>,
     {
-        self.iter().scan(start, move |start, dir| {
+        self.into_iter().scan(start, move |start, dir| {
             *start = dir.next_space(*start);
 
             Some(*start)
@@ -65,11 +65,7 @@ impl RayOwned {
     }
 
     pub fn cast(&self, start: UncheckedSpace) -> impl Iterator<Item = UncheckedSpace> + '_ {
-        self.iter().scan(start, move |start, dir| {
-            *start = dir.next_space(*start);
-
-            Some(*start)
-        })
+        self.as_borrowed().cast(start)
     }
 }
 
@@ -123,5 +119,18 @@ impl Rays {
 
     pub fn set_limit(&mut self, direction: &Direction, mut limit: Option<usize>) {
         self.map.get_mut(direction).replace(&mut limit);
+    }
+
+    pub fn rays(&self) -> impl Iterator<Item = RayBorrowed<Direction>> {
+        self.map
+            .iter()
+            .map(|(direction, limit)| RayBorrowed::new(*limit, direction))
+    }
+
+    pub fn cast(
+        &self,
+        start: UncheckedSpace,
+    ) -> impl Iterator<Item = impl Iterator<Item = UncheckedSpace> + '_> {
+        self.rays().map(move |ray| ray.cast(start))
     }
 }
