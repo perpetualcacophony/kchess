@@ -1,4 +1,4 @@
-use crate::{ChessSide, Space, UncheckedSpace};
+use crate::{direction::Cardinal, ChessSide, Space, UncheckedSpace};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Board {
@@ -13,6 +13,14 @@ impl Board {
         } else {
             None
         }
+    }
+
+    pub fn max_rank(&self) -> usize {
+        self.ranks - 1
+    }
+
+    pub fn max_file(&self) -> usize {
+        self.files - 1
     }
 
     pub fn expect_space(&self, rank: usize, file: usize) -> Space {
@@ -34,9 +42,13 @@ impl Board {
             .filter_map(|unchecked| self.check_space(unchecked))
     }
 
-    pub fn last_rank(&self, side: ChessSide, rank: usize) -> bool {
-        (side == ChessSide::White && rank == self.ranks - 1)
-            || (side == ChessSide::Black && rank == 0)
+    pub fn opposite_end(&self, side: ChessSide, space: Space) -> bool {
+        let direction = side.forward_cardinal();
+
+        (direction == Cardinal::NORTH && space.rank() == self.max_rank())
+            || (direction == Cardinal::EAST && space.file() == self.max_file())
+            || (direction == Cardinal::SOUTH && space.rank() == 0)
+            || (direction == Cardinal::WEST && space.file() == 0)
     }
 
     pub fn grid(&self) -> Vec<Vec<Space>> {

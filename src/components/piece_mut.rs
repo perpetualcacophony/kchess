@@ -10,7 +10,9 @@ bundle! {
 }
 
 impl<'c> PieceMut<'c> {
-    pub fn capture(&mut self) {}
+    pub fn capture(&mut self) {
+        *self.captured = true;
+    }
 
     pub fn promote(&mut self) {
         *self.piece = ChessPiece::queen();
@@ -30,7 +32,7 @@ impl<'c> PieceMut<'c> {
 
         *self.space = space;
 
-        if self.piece.can_promote && board.last_rank(*self.side, self.space.rank()) {
+        if self.piece.can_promote && board.opposite_end(*self.side, *self.space) {
             self.promote();
         }
     }

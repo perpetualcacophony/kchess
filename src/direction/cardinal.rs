@@ -17,6 +17,41 @@ impl Cardinal {
     pub const ARRAY: [Self; 4] = [Self::NORTH, Self::EAST, Self::SOUTH, Self::WEST];
     pub const SLICE: &[Self] = &[Self::NORTH, Self::EAST, Self::SOUTH, Self::WEST];
 
+    pub fn rotate_cw(self, turns: usize) -> Self {
+        if turns == 1 {
+            self
+        } else if turns == 2 {
+            self.opposite()
+        } else {
+            let mut rotated = self;
+
+            for _ in 0..turns {
+                rotated = match rotated {
+                    Self::NORTH => Self::EAST,
+                    Self::EAST => Self::SOUTH,
+                    Self::SOUTH => Self::WEST,
+                    Self::WEST => Self::NORTH,
+                }
+            }
+
+            rotated
+        }
+    }
+
+    pub fn turns_cw(self, rhs: Self) -> usize {
+        if self == rhs {
+            0
+        } else if self == rhs.opposite() {
+            2
+        } else if self.rotate_cw(1) == rhs {
+            1
+        } else if self.rotate_cw(3) == rhs {
+            3
+        } else {
+            unreachable!()
+        }
+    }
+
     pub const fn perpendicular(self) -> [Self; 2] {
         match self {
             Self::North | Self::South => [Self::East, Self::West],

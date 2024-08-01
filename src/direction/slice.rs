@@ -13,12 +13,31 @@ impl<'a> DirectionSlice<'a> {
         self.map(|cardinals| cardinals.iter().copied().map(Cardinal::opposite).collect())
     }
 
-    pub fn relative(self, side: ChessSide) -> DirectionBoxed {
-        if side == ChessSide::White {
-            self.into_boxed()
+    pub fn first(self) -> Option<Cardinal> {
+        self.cardinals.first().copied()
+    }
+
+    pub fn align_cardinal(self, cardinal: Cardinal) -> DirectionBoxed {
+        if let Some(first) = self.first() {
+            let turns = first.turns_cw(cardinal);
+
+            if turns == 0 {
+                self.into_boxed()
+            } else {
+                self.map(|cardinals| {
+                    cardinals
+                        .iter()
+                        .map(|cardinal| cardinal.rotate_cw(turns))
+                        .collect()
+                })
+            }
         } else {
-            self.opposite()
+            self.into_boxed()
         }
+    }
+
+    pub fn relative(self, side: ChessSide) -> DirectionBoxed {
+        self.align_cardinal(side.forward_cardinal())
     }
 }
 

@@ -34,21 +34,9 @@ impl Game {
     }
 
     pub fn sides(&self) -> [components::Side<'_>; 2] {
-        [
-            components::Side {
-                side: ChessSide::White,
-                pieces: self
-                    .pieces()
-                    .filter(|piece| piece.side == &ChessSide::White)
-                    .collect(),
-            },
-            components::Side {
-                side: ChessSide::Black,
-                pieces: self
-                    .pieces()
-                    .filter(|piece| piece.side == &ChessSide::Black)
-                    .collect(),
-            },
-        ]
+        ChessSide::two().map(|side| components::Side {
+            side,
+            pieces: self.pieces().filter(|piece| piece.side == &side).collect(),
+        })
     }
 }
