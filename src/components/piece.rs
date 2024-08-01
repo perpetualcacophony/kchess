@@ -16,24 +16,12 @@ impl<'c> Piece<'c> {
         let mut moves = Vec::new();
         let mut pieces = pieces.not_captured();
 
-        let rays: Vec<_> = self
-            .piece
-            .rays
-            .iter()
-            .map(|ray| ray.cast(self.space.as_unchecked()))
-            .collect();
-
         if let Some(ref capture_rays) = self.piece.capture_rays {
-            let capture_rays: Vec<_> = capture_rays
-                .iter()
-                .map(|ray| ray.cast(self.space.as_unchecked()))
-                .collect();
-
-            for ray in rays {
-                let mut ray = board.check_iter(ray);
+            for ray in &self.piece.rays {
+                let mut cast = board.check_iter(ray.cast(self.space.as_unchecked()));
 
                 loop {
-                    if let Some(space) = ray.next() {
+                    if let Some(space) = cast.next() {
                         if pieces.by_ref().any(|piece| piece.space == &space) {
                             break;
                         } else {
@@ -44,10 +32,10 @@ impl<'c> Piece<'c> {
             }
 
             for ray in capture_rays {
-                let mut ray = board.check_iter(ray);
+                let mut cast = board.check_iter(ray.cast(self.space.as_unchecked()));
 
                 loop {
-                    if let Some(space) = ray.next() {
+                    if let Some(space) = cast.next() {
                         if let Some(piece) = pieces.by_ref().find(|piece| piece.space == &space) {
                             if piece.side != self.side {
                                 moves.push(space)
@@ -59,11 +47,11 @@ impl<'c> Piece<'c> {
                 }
             }
         } else {
-            for ray in rays {
-                let mut ray = board.check_iter(ray);
+            for ray in &self.piece.rays {
+                let mut cast = board.check_iter(ray.cast(self.space.as_unchecked()));
 
                 loop {
-                    if let Some(space) = ray.next() {
+                    if let Some(space) = cast.next() {
                         if let Some(piece) = pieces.by_ref().find(|piece| piece.space == &space) {
                             if piece.side != self.side {
                                 moves.push(space)

@@ -1,7 +1,7 @@
 use crate::{
     direction::{
         self,
-        ray::{RayBuilder, RayOwned, RaySet},
+        ray::{RayBuilder, RaySet},
     },
     ChessSide,
 };

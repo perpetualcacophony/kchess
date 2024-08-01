@@ -106,10 +106,8 @@ impl RaySet {
         Self::default()
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = RaySlice> {
-        self.map
-            .iter()
-            .map(|(direction, limit)| RaySlice::new(*limit, direction.as_slice()))
+    pub fn iter(&self) -> RaySetIter {
+        RaySetIter::new(self)
     }
 
     pub fn map<F>(mut self, mut f: F) -> Self
@@ -157,5 +155,36 @@ impl RaySet {
     pub fn with_set(mut self, other: RaySet) -> Self {
         self.add_set(other);
         self
+    }
+}
+
+impl<'a> IntoIterator for &'a RaySet {
+    type IntoIter = RaySetIter<'a>;
+    type Item = <Self::IntoIter as Iterator>::Item;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+pub struct RaySetIter<'a> {
+    inner: std::collections::hash_map::Iter<'a, DirectionBoxed, Option<usize>>,
+}
+
+impl<'a> RaySetIter<'a> {
+    fn new(set: &'a RaySet) -> Self {
+        Self {
+            inner: set.map.iter(),
+        }
+    }
+}
+
+impl<'a> Iterator for RaySetIter<'a> {
+    type Item = RaySlice<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner
+            .next()
+            .map(|(direction, limit)| RaySlice::new(*limit, direction.as_slice()))
     }
 }

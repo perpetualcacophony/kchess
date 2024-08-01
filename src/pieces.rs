@@ -1,7 +1,4 @@
-use crate::{
-    direction::ray::{RayOwned as Ray, RaySet, RayStatic},
-    ChessSide,
-};
+use crate::{direction::ray::RaySet, ChessSide};
 
 pub mod pawn;
 
