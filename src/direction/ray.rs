@@ -23,35 +23,30 @@ impl<'a> Ray<'a> {
         Self::new(builder.limit, builder.direction)
     }
 
-    pub const fn iter(&self) -> Iter<'a> {
-        Iter::new(self.limit, self.direction)
+    const fn steps(self) -> Steps<'a> {
+        Steps::new(self)
     }
 
-    pub const fn into_iter(self) -> Iter<'a> {
-        Iter::new(self.limit, self.direction)
-    }
-
-    pub fn cast(self, start: UncheckedSpace) -> impl Iterator<Item = UncheckedSpace> + 'a {
-        self.into_iter().scan(start, move |start, dir| {
-            *start = dir.next_space(*start);
-
-            Some(*start)
-        })
+    pub fn cast(self, start: UncheckedSpace) -> Cast<'a> {
+        Cast::new(self, start)
     }
 }
 
-pub struct Iter<'ray> {
+struct Steps<'ray> {
     limit: Option<usize>,
     direction: DirectionSlice<'ray>,
 }
 
-impl<'a> Iter<'a> {
-    const fn new(limit: Option<usize>, direction: DirectionSlice<'a>) -> Self {
-        Self { limit, direction }
+impl<'ray> Steps<'ray> {
+    const fn new(ray: Ray<'ray>) -> Self {
+        Self {
+            limit: ray.limit,
+            direction: ray.direction,
+        }
     }
 }
 
-impl<'ray> Iterator for Iter<'ray> {
+impl<'ray> Iterator for Steps<'ray> {
     type Item = DirectionSlice<'ray>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -64,5 +59,35 @@ impl<'ray> Iterator for Iter<'ray> {
         }
 
         Some(self.direction)
+    }
+}
+
+type CastInner<'ray> = std::iter::Scan<
+    Steps<'ray>,
+    UncheckedSpace,
+    fn(&mut UncheckedSpace, <Steps as Iterator>::Item) -> Option<UncheckedSpace>,
+>;
+
+pub struct Cast<'ray> {
+    inner: CastInner<'ray>,
+}
+
+impl<'ray> Cast<'ray> {
+    fn new(ray: Ray<'ray>, start: UncheckedSpace) -> Self {
+        Self {
+            inner: ray.steps().scan(start, |start, step| {
+                *start = step.next_space(*start);
+
+                Some(*start)
+            }),
+        }
+    }
+}
+
+impl<'ray> Iterator for Cast<'ray> {
+    type Item = UncheckedSpace;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next()
     }
 }
