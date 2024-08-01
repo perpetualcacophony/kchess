@@ -15,6 +15,10 @@ pub struct Ray {
 }
 
 impl Ray {
+    pub const fn capture(&self) -> bool {
+        self.capture
+    }
+
     pub const fn from_builder(builder: RayBuilder) -> Self {
         Self {
             limit: builder.limit,

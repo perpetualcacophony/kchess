@@ -33,51 +33,19 @@ impl<'c> Piece<'c> {
 
         let mut pieces = unfiltered.clone().filter(|piece| !piece.captured);
 
-        if let Some(ref capture_rays) = self.piece.capture_rays {
-            for ray in &self.piece.rays {
-                let mut cast = board.check_iter(ray.cast(self.space.as_unchecked()));
+        for (ray, cast) in self.piece.rays.cast(self.space.as_unchecked()) {
+            let mut cast = board.check_iter(cast);
 
-                loop {
-                    if let Some(space) = cast.next() {
-                        if pieces.by_ref().any(|piece| piece.space == &space) {
+            loop {
+                if let Some(space) = cast.next() {
+                    if let Some(piece) = pieces.by_ref().find(|piece| piece.space == &space) {
+                        if piece.side != self.side && ray.capture() {
+                            moves.push(space)
+                        } else {
                             break;
-                        } else {
-                            moves.push(space)
                         }
-                    }
-                }
-            }
-
-            for ray in capture_rays {
-                let mut cast = board.check_iter(ray.cast(self.space.as_unchecked()));
-
-                loop {
-                    if let Some(space) = cast.next() {
-                        if let Some(piece) = pieces.by_ref().find(|piece| piece.space == &space) {
-                            if piece.side != self.side {
-                                moves.push(space)
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            for ray in &self.piece.rays {
-                let mut cast = board.check_iter(ray.cast(self.space.as_unchecked()));
-
-                loop {
-                    if let Some(space) = cast.next() {
-                        if let Some(piece) = pieces.by_ref().find(|piece| piece.space == &space) {
-                            if piece.side != self.side {
-                                moves.push(space)
-                            } else {
-                                break;
-                            }
-                        } else {
-                            moves.push(space)
-                        }
+                    } else {
+                        moves.push(space)
                     }
                 }
             }

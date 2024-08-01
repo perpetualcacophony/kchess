@@ -1,9 +1,14 @@
 use crate::direction::ray::RaySet;
 
-use super::{bishop, rook};
+use super::{Bishop, PieceKind, Rook};
 
-pub fn rays() -> RaySet {
-    RaySet::new()
-        .with_set(bishop::rays())
-        .with_set(rook::rays())
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct Queen;
+
+impl PieceKind for Queen {
+    const VALUE: usize = 9;
+
+    fn add_rays<'rays>(&self, set: &'rays mut RaySet) -> &'rays mut RaySet {
+        set.add_piece(Bishop).add_piece(Rook)
+    }
 }

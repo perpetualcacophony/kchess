@@ -1,7 +1,16 @@
-use crate::direction::ray::RaySet;
+use crate::direction::ray::{Ray, RaySet};
 
-use super::queen;
+use super::{PieceKind, Queen};
 
-pub fn rays() -> RaySet {
-    queen::rays().map(|_| Some(1))
+pub struct King;
+
+impl PieceKind for King {
+    const VALUE: usize = usize::MAX;
+    const VALID_PROMOTION: bool = false;
+    const CHECKMATE_POSSIBLE: bool = true;
+
+    fn add_rays<'rays>(&self, set: &'rays mut RaySet) -> &'rays mut RaySet {
+        set.add_piece(Queen)
+            .map(|ray| *ray = Ray::from_builder(ray.into_builder().limit(1)))
+    }
 }

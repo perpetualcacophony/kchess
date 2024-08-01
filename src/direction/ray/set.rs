@@ -2,7 +2,7 @@ use std::borrow::Borrow;
 
 use crate::{pieces::PieceKind, UncheckedSpace};
 
-use super::{Ray, RayBuilder};
+use super::{Cast, Ray, RayBuilder};
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct RaySet {
@@ -18,21 +18,16 @@ impl RaySet {
         Iter::new(self)
     }
 
-    pub fn map<F>(mut self, mut f: F) -> Self
+    pub fn map<F>(&mut self, f: F) -> &mut Self
     where
-        F: FnMut(Option<usize>) -> Option<usize>,
+        F: FnMut(&mut Ray),
     {
-        self.rays
-            .iter_mut()
-            .for_each(|ray| ray.limit = f(ray.limit));
+        self.rays.iter_mut().for_each(f);
         self
     }
 
-    pub fn cast(
-        &self,
-        start: UncheckedSpace,
-    ) -> impl Iterator<Item = impl Iterator<Item = UncheckedSpace> + '_> + '_ {
-        self.iter().map(move |ray| ray.cast(start))
+    pub fn cast(&self, start: UncheckedSpace) -> impl Iterator<Item = (&Ray, Cast<'_>)> + '_ {
+        self.iter().map(move |ray| (ray, ray.cast(start)))
     }
 
     pub fn add(&mut self, builder: RayBuilder) -> &mut Self {

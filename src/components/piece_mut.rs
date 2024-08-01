@@ -1,4 +1,7 @@
-use crate::{pieces::PieceData, Board, ChessSide, Space};
+use crate::{
+    pieces::{PieceData, Queen},
+    Board, ChessSide, Space,
+};
 
 bundle! {
     mut PieceMut
@@ -15,7 +18,7 @@ impl<'c> PieceMut<'c> {
     }
 
     pub fn promote(&mut self) {
-        *self.piece = PieceData::queen();
+        *self.piece = PieceData::from_kind(Queen)
     }
 
     pub fn move_to(

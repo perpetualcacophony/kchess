@@ -6,13 +6,27 @@ use crate::{
     ChessSide, Direction,
 };
 
-pub fn step_ray(side: ChessSide, moved: bool) -> RaySet {
-    let limit = if moved { 1 } else { 2 };
-    RaySet::new().with(RayBuilder::new(Cardinal::NORTH.relative(side)).limit(limit))
+use super::PieceKind;
+
+pub struct Pawn {
+    moved: bool,
+    side: ChessSide,
 }
 
-pub fn capture_rays(side: ChessSide) -> RaySet {
-    RaySet::new()
-        .with(RayBuilder::new(Diagonal::NORTHEAST.relative(side)).once())
-        .with(RayBuilder::new(Diagonal::NORTHWEST.relative(side)).once())
+impl PieceKind for Pawn {
+    const VALUE: usize = 1;
+    const CAN_PROMOTE: bool = true;
+    const VALID_PROMOTION: bool = false;
+
+    fn add_rays<'rays>(&self, set: &'rays mut RaySet) -> &'rays mut RaySet {
+        let limit = if self.moved { 1 } else { 2 };
+
+        set.add(RayBuilder::new(Diagonal::NORTHEAST.relative(self.side)).once())
+            .add(RayBuilder::new(Diagonal::NORTHEAST.relative(self.side)).once())
+            .add(
+                RayBuilder::new(Cardinal::NORTH.relative(self.side))
+                    .limit(limit)
+                    .capture(false),
+            )
+    }
 }
