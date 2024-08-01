@@ -2,6 +2,7 @@ use crate::{components::Piece, Components, EntityId};
 
 use super::Game;
 
+#[derive(Clone)]
 pub struct AllPieces<'c> {
     inner: std::collections::hash_map::Values<'c, EntityId, Components>,
 }

@@ -1,4 +1,4 @@
-use crate::{pieces::ChessPiece, Board, ChessSide, Space};
+use crate::{game::AllPieces, pieces::ChessPiece, Board, ChessSide, Space};
 
 use crate::game;
 
@@ -12,9 +12,26 @@ bundle! {
 }
 
 impl<'c> Piece<'c> {
-    pub fn legal_moves(&self, board: &Board, pieces: game::AllPieces<'c>) -> Vec<Space> {
+    pub fn dangerous_spaces(
+        self,
+        board: &'c Board,
+        all_pieces: AllPieces<'c>,
+    ) -> impl Iterator<Item = Space> + 'c {
+        all_pieces
+            .clone()
+            .filter_map(move |piece| {
+                (piece.side != self.side)
+                    .then_some(piece.legal_moves_inner(board, all_pieces.clone()))
+            })
+            .flatten()
+    }
+
+    fn legal_moves_inner(self, board: &'c Board, pieces: AllPieces<'c>) -> Vec<Space> {
         let mut moves = Vec::new();
-        let mut pieces = pieces.not_captured();
+
+        let unfiltered = pieces.into_iter();
+
+        let mut pieces = unfiltered.clone().filter(|piece| !piece.captured);
 
         if let Some(ref capture_rays) = self.piece.capture_rays {
             for ray in &self.piece.rays {
@@ -67,9 +84,14 @@ impl<'c> Piece<'c> {
         }
 
         if self.piece.checkmate_possible {
-            todo!()
+            let dangerous_spaces = self.dangerous_spaces(board, unfiltered).collect::<Vec<_>>();
+            moves.retain(|space| !dangerous_spaces.contains(space));
         }
 
         moves
+    }
+
+    pub fn legal_moves(self, board: &Board, pieces: game::AllPieces<'c>) -> Vec<Space> {
+        self.legal_moves_inner(board, pieces)
     }
 }
