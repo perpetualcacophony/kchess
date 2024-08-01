@@ -97,11 +97,11 @@ impl<'ray> Iterator for Iter<'ray> {
 }
 
 #[derive(Default, Debug, Clone)]
-pub struct Rays {
+pub struct RaySet {
     map: std::collections::HashMap<DirectionBoxed, Option<usize>>,
 }
 
-impl Rays {
+impl RaySet {
     pub fn new() -> Self {
         Self::default()
     }
@@ -135,7 +135,7 @@ impl Rays {
         builders.into_iter().for_each(|builder| self.add(builder))
     }
 
-    pub fn add_set(&mut self, other: Rays) {
+    pub fn add_set(&mut self, other: RaySet) {
         other.map.into_iter().for_each(|(direction, limit)| {
             self.map.insert(direction, limit);
         })
@@ -154,7 +154,7 @@ impl Rays {
         self
     }
 
-    pub fn with_set(mut self, other: Rays) -> Self {
+    pub fn with_set(mut self, other: RaySet) -> Self {
         self.add_set(other);
         self
     }

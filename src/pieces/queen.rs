@@ -1,6 +1,6 @@
 use crate::direction::{
     self, cardinal, diagonal,
-    ray::{RayOwned, Rays},
+    ray::{RayOwned, RaySet},
     Cardinal, Direction,
 };
 
@@ -24,8 +24,8 @@ pub fn rays() -> [QueenRay; 8] {
     directions().map(|direction| QueenRay::new(None, direction.into_boxed()))
 }
 
-pub fn rays_new() -> Rays {
-    Rays::new()
+pub fn rays_new() -> RaySet {
+    RaySet::new()
         .with_set(bishop::rays_new())
         .with_set(rook::rays_new())
 }

@@ -1,7 +1,7 @@
 use crate::{
     direction::{
         self,
-        ray::{RayBuilder, RayOwned, Rays},
+        ray::{RayBuilder, RayOwned, RaySet},
     },
     ChessSide,
 };
@@ -40,13 +40,13 @@ pub fn capture_rays(side: ChessSide) -> [RayOwned; 2] {
     ]
 }
 
-pub fn step_ray_new(side: ChessSide, moved: bool) -> Rays {
+pub fn step_ray_new(side: ChessSide, moved: bool) -> RaySet {
     let limit = if moved { 1 } else { 2 };
-    Rays::new().with(RayBuilder::new(direction::cardinal::NORTH.relative(side)).limit(limit))
+    RaySet::new().with(RayBuilder::new(direction::cardinal::NORTH.relative(side)).limit(limit))
 }
 
-pub fn capture_rays_new(side: ChessSide) -> Rays {
-    Rays::new()
+pub fn capture_rays_new(side: ChessSide) -> RaySet {
+    RaySet::new()
         .with(RayBuilder::new(direction::diagonal::NORTHEAST.relative(side)).limit(1))
         .with(RayBuilder::new(direction::diagonal::NORTHWEST.relative(side)).limit(1))
 }
