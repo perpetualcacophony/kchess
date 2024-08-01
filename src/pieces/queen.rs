@@ -15,5 +15,5 @@ pub fn directions() -> [QueenDirection; 8] {
 pub type QueenRay = RayOwned;
 
 pub fn rays() -> [QueenRay; 8] {
-    directions().map(|direction| QueenRay::new(None, direction.into_owned()))
+    directions().map(|direction| QueenRay::new(None, direction.into_boxed()))
 }

@@ -20,7 +20,7 @@ pub fn step_ray(side: ChessSide, moved: bool) -> RayOwned {
     let limit = if moved { 1 } else { 2 };
     RayOwned::new(
         Some(limit),
-        direction::cardinal::NORTH.relative(side).into_owned(),
+        direction::cardinal::NORTH.as_slice().relative(side),
     )
 }
 
@@ -28,11 +28,11 @@ pub fn capture_rays(side: ChessSide) -> [RayOwned; 2] {
     [
         RayOwned::new(
             Some(1),
-            direction::diagonal::NORTHEAST.relative(side).into_owned(),
+            direction::diagonal::NORTHEAST.as_slice().relative(side),
         ),
         RayOwned::new(
             Some(1),
-            direction::diagonal::NORTHWEST.relative(side).into_owned(),
+            direction::diagonal::NORTHWEST.as_slice().relative(side),
         ),
     ]
 }

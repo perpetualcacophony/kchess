@@ -1,5 +1,5 @@
 #[derive(Debug, Copy, Clone)]
-pub struct RayBuilder<Direction = crate::Direction> {
+pub struct RayBuilder<Direction> {
     pub(super) limit: Option<usize>,
     pub(super) direction: Direction,
 }

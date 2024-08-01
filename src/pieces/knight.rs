@@ -17,5 +17,5 @@ pub fn directions() -> [DirectionArray<3>; 8] {
 pub type KnightRay = RayOwned;
 
 pub fn rays() -> [KnightRay; 8] {
-    directions().map(|direction| RayOwned::new(Some(1), direction.into_owned()))
+    directions().map(|direction| RayOwned::new(Some(1), direction.as_slice().into_boxed()))
 }

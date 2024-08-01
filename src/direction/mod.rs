@@ -9,20 +9,53 @@ pub mod ray;
 use crate::{ChessSide, UncheckedSpace};
 
 #[derive(Copy, Clone, Debug, PartialEq, Hash, Eq)]
-pub struct Direction<Cardinals = Vec<Cardinal>> {
+pub struct Direction<Cardinals> {
     cardinals: Cardinals,
+}
+
+pub type DirectionBoxed = Direction<Box<[Cardinal]>>;
+
+pub type DirectionArray<const N: usize> = Direction<[Cardinal; N]>;
+
+impl<const N: usize> DirectionArray<N> {
+    pub fn as_slice(&self) -> DirectionSlice<'_> {
+        DirectionSlice::from_cardinals(self.cardinals.as_slice())
+    }
+}
+
+pub type DirectionSlice<'a> = Direction<&'a [Cardinal]>;
+
+impl DirectionSlice<'_> {
+    pub fn into_boxed(self) -> DirectionBoxed {
+        DirectionBoxed::from_cardinals(self.cardinals.into())
+    }
+
+    pub fn opposite(self) -> DirectionBoxed {
+        self.map(|cardinals| {
+            cardinals
+                .into_iter()
+                .copied()
+                .map(Cardinal::opposite)
+                .collect()
+        })
+    }
+
+    pub fn relative(self, side: ChessSide) -> DirectionBoxed {
+        if side == ChessSide::White {
+            self.into_boxed()
+        } else {
+            self.opposite()
+        }
+    }
+
+    pub fn next_space(self, start: UncheckedSpace) -> UncheckedSpace {
+        self.into_iter().fold(start, UncheckedSpace::cardinal)
+    }
 }
 
 impl<Cardinals> Direction<Cardinals> {
     pub const fn from_cardinals(cardinals: Cardinals) -> Self {
         Self { cardinals }
-    }
-
-    pub fn into_owned(self) -> Direction
-    where
-        Cardinals: Into<Vec<Cardinal>>,
-    {
-        Direction::from_cardinals(self.cardinals.into())
     }
 
     pub fn map<NewCardinals, F>(self, mut f: F) -> Direction<NewCardinals>
@@ -33,29 +66,53 @@ impl<Cardinals> Direction<Cardinals> {
     }
 }
 
-impl<Cardinals> Direction<Cardinals>
+impl<'a> IntoIterator for &'a DirectionBoxed {
+    type Item = Cardinal;
+    type IntoIter = std::iter::Copied<std::slice::Iter<'a, Cardinal>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.cardinals.iter().copied()
+    }
+}
+
+impl<'a> IntoIterator for DirectionSlice<'a> {
+    type Item = Cardinal;
+    type IntoIter = std::iter::Copied<std::slice::Iter<'a, Cardinal>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.cardinals.iter().copied()
+    }
+}
+
+impl DirectionBoxed {
+    pub const fn as_ref(&self) -> DirectionSlice {
+        DirectionSlice::from_cardinals(&self.cardinals)
+    }
+}
+
+impl<'a, Cardinals> Direction<Cardinals>
 where
-    for<'a> &'a Self: IntoIterator<Item = Cardinal>,
+    &'a Self: IntoIterator<Item = Cardinal> + 'a,
 {
-    pub fn iter(&self) -> <&Self as IntoIterator>::IntoIter {
+    pub fn iter(&'a self) -> impl Iterator<Item = Cardinal> + 'a {
         self.into_iter()
     }
 
-    pub fn next_space(&self, start: UncheckedSpace) -> UncheckedSpace {
+    pub fn next_space(&'a self, start: UncheckedSpace) -> UncheckedSpace {
         self.iter().fold(start, UncheckedSpace::cardinal)
     }
 }
 
-impl<Cardinals> Direction<Cardinals>
+impl<'a, Cardinals> Direction<Cardinals>
 where
     Self: FromIterator<Cardinal>,
-    for<'a> &'a Self: IntoIterator<Item = Cardinal>,
+    &'a Self: IntoIterator<Item = Cardinal> + 'a,
 {
-    pub fn opposite(&self) -> Self {
+    pub fn opposite(&'a self) -> Self {
         Self::from_iter(self.iter().map(Cardinal::opposite))
     }
 
-    pub fn relative(&self, side: ChessSide) -> Self
+    pub fn relative(&'a self, side: ChessSide) -> Self
     where
         Self: Clone,
     {
@@ -66,20 +123,6 @@ where
         }
     }
 }
-
-impl<'a, Cardinals> IntoIterator for &'a Direction<Cardinals>
-where
-    &'a Cardinals: IntoIterator<Item = &'a Cardinal>,
-{
-    type Item = Cardinal;
-    type IntoIter = Iter<'a, Cardinals>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.cardinals.into_iter().copied()
-    }
-}
-
-pub type Iter<'a, Cardinals> = std::iter::Copied<<&'a Cardinals as IntoIterator>::IntoIter>;
 
 impl<Cardinals> FromIterator<Cardinal> for Direction<Cardinals>
 where
@@ -97,11 +140,15 @@ pub enum OneOrTwo<T> {
 }
 
 impl<T> OneOrTwo<T> {
-    fn iter(&self) -> std::slice::Iter<T> {
+    fn as_slice(&self) -> &[T] {
         match self {
-            Self::One(array) => array.iter(),
-            Self::Two(array) => array.iter(),
+            Self::One(array) => array,
+            Self::Two(array) => array,
         }
+    }
+
+    fn iter(&self) -> std::slice::Iter<T> {
+        self.as_slice().iter()
     }
 }
 
@@ -119,22 +166,6 @@ impl<T: Clone> From<OneOrTwo<T>> for Vec<T> {
         match value {
             OneOrTwo::One(array) => array.to_vec(),
             OneOrTwo::Two(array) => array.to_vec(),
-        }
-    }
-}
-
-pub type DirectionArray<const N: usize> = Direction<[Cardinal; N]>;
-
-impl<const N: usize> DirectionArray<N> {
-    pub fn opposite(self) -> Self {
-        self.map(|cardinals| cardinals.map(Cardinal::opposite))
-    }
-
-    pub fn relative(self, side: ChessSide) -> Self {
-        if side == ChessSide::White {
-            self
-        } else {
-            self.opposite()
         }
     }
 }
@@ -161,5 +192,15 @@ impl DirectionDiagonal {
 
     pub const fn diagonal_ne(north: bool, east: bool) -> Self {
         diagonal::new_ne(north, east)
+    }
+}
+
+impl Direction<OneOrTwo<Cardinal>> {
+    pub fn as_slice(&self) -> DirectionSlice {
+        DirectionSlice::from_cardinals(self.cardinals.as_slice())
+    }
+
+    pub fn into_boxed(self) -> DirectionBoxed {
+        self.as_slice().into_boxed()
     }
 }
