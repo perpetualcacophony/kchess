@@ -1,4 +1,4 @@
-use crate::UncheckedSpace;
+use crate::{pieces::PieceKind, UncheckedSpace};
 
 use super::{Ray, RayBuilder};
 
@@ -33,20 +33,32 @@ impl RaySet {
         self.iter().map(move |ray| ray.cast(start))
     }
 
-    pub fn add(&mut self, builder: RayBuilder) {
+    pub fn add(&mut self, builder: RayBuilder) -> &mut Self {
         if let Some(index) = self.rays.iter().position(|ray| ray.step == builder.step) {
             self.rays.remove(index);
         }
 
-        self.rays.push(Ray::from_builder(builder))
+        self.rays.push(Ray::from_builder(builder));
+
+        self
     }
 
-    pub fn add_many(&mut self, builders: impl IntoIterator<Item = RayBuilder>) {
-        builders.into_iter().for_each(|builder| self.add(builder))
+    pub fn add_many(&mut self, builders: impl IntoIterator<Item = RayBuilder>) -> &mut Self {
+        builders.into_iter().for_each(|builder| {
+            self.add(builder);
+        });
+        self
     }
 
-    pub fn add_set(&mut self, other: RaySet) {
-        other.into_iter().for_each(|ray| self.add(ray.to_builder()))
+    pub fn add_set(&mut self, other: RaySet) -> &mut Self {
+        other.into_iter().for_each(|ray| {
+            self.add(ray.to_builder());
+        });
+        self
+    }
+
+    pub fn add_piece<P: PieceKind>(&mut self) -> &mut Self {
+        P::add_rays(self)
     }
 
     pub fn with(mut self, builder: RayBuilder) -> Self {
