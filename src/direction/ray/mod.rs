@@ -11,15 +11,16 @@ pub use set::RaySet;
 pub struct Ray {
     limit: Option<usize>,
     step: Step,
+    capture: bool,
 }
 
 impl Ray {
-    pub const fn new(limit: Option<usize>, step: Step) -> Self {
-        Self { limit, step }
-    }
-
     pub const fn from_builder(builder: RayBuilder) -> Self {
-        Self::new(builder.limit, builder.step)
+        Self {
+            limit: builder.limit,
+            step: builder.step,
+            capture: builder.capture,
+        }
     }
 
     const fn steps(&self) -> Steps {
@@ -30,10 +31,11 @@ impl Ray {
         Cast::new(self, start)
     }
 
-    pub fn to_builder(self) -> RayBuilder {
+    pub fn into_builder(self) -> RayBuilder {
         RayBuilder {
-            step: self.step,
             limit: self.limit,
+            capture: self.capture,
+            step: self.step,
         }
     }
 }

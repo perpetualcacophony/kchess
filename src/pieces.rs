@@ -1,6 +1,8 @@
+use std::borrow::Borrow;
+
 use crate::{
     direction::{
-        ray::{Ray, RayBuilder, RaySet},
+        ray::{RayBuilder, RaySet},
         Cardinal, Diagonal,
     },
     ChessSide,
@@ -95,9 +97,9 @@ impl PieceData {
         }
     }
 
-    pub fn from_kind<P: PieceKind>() -> Self {
+    pub fn from_kind<P: PieceKind>(piece: impl Borrow<P>) -> Self {
         let mut rays = RaySet::new();
-        P::add_rays(&mut rays);
+        rays.add_piece(piece);
 
         Self {
             value: P::VALUE,
@@ -116,7 +118,7 @@ pub trait PieceKind: Sized {
     const VALID_PROMOTION: bool = true;
     const CHECKMATE_POSSIBLE: bool = false;
 
-    fn add_rays(set: &mut RaySet) -> &mut RaySet;
+    fn add_rays<'rays>(&self, set: &'rays mut RaySet) -> &'rays mut RaySet;
 }
 
 pub struct Bishop;
@@ -124,7 +126,7 @@ pub struct Bishop;
 impl PieceKind for Bishop {
     const VALUE: usize = 3;
 
-    fn add_rays(set: &mut RaySet) -> &mut RaySet {
+    fn add_rays<'rays>(&self, set: &'rays mut RaySet) -> &'rays mut RaySet {
         set.add_many(Diagonal::ARRAY.map(RayBuilder::new))
     }
 }
@@ -134,7 +136,7 @@ pub struct Rook;
 impl PieceKind for Rook {
     const VALUE: usize = 5;
 
-    fn add_rays(set: &mut RaySet) -> &mut RaySet {
+    fn add_rays<'rays>(&self, set: &'rays mut RaySet) -> &'rays mut RaySet {
         set.add_many(Cardinal::ARRAY.map(RayBuilder::new))
     }
 }
@@ -144,7 +146,7 @@ pub struct Queen;
 impl PieceKind for Queen {
     const VALUE: usize = 9;
 
-    fn add_rays(set: &mut RaySet) -> &mut RaySet {
-        set.add_piece::<Bishop>().add_piece::<Rook>()
+    fn add_rays<'rays>(&self, set: &'rays mut RaySet) -> &'rays mut RaySet {
+        set.add_piece(Bishop).add_piece(Rook)
     }
 }

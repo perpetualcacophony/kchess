@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+
 use crate::{pieces::PieceKind, UncheckedSpace};
 
 use super::{Ray, RayBuilder};
@@ -52,13 +54,13 @@ impl RaySet {
 
     pub fn add_set(&mut self, other: RaySet) -> &mut Self {
         other.into_iter().for_each(|ray| {
-            self.add(ray.to_builder());
+            self.add(ray.into_builder());
         });
         self
     }
 
-    pub fn add_piece<P: PieceKind>(&mut self) -> &mut Self {
-        P::add_rays(self)
+    pub fn add_piece<P: PieceKind>(&mut self, kind: impl Borrow<P>) -> &mut Self {
+        P::add_rays(kind.borrow(), self)
     }
 
     pub fn with(mut self, builder: RayBuilder) -> Self {
