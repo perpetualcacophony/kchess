@@ -1,4 +1,7 @@
-use crate::direction::{ray::RayOwned, Cardinal, DirectionArray};
+use crate::direction::{
+    ray::{RayBuilder, RayOwned, Rays},
+    Cardinal, DirectionArray,
+};
 
 pub fn from_long(long: Cardinal) -> [DirectionArray<3>; 2] {
     long.perpendicular().map(|cardinal| new(long, cardinal))
@@ -18,4 +21,8 @@ pub type KnightRay = RayOwned;
 
 pub fn rays() -> [KnightRay; 8] {
     directions().map(|direction| RayOwned::new(Some(1), direction.as_slice().into_boxed()))
+}
+
+pub fn rays_new() -> Rays {
+    Rays::new().with_many(directions().map(|direction| RayBuilder::new(direction.boxed()).limit(1)))
 }

@@ -112,6 +112,14 @@ impl Rays {
             .map(|(direction, limit)| RaySlice::new(*limit, direction.as_slice()))
     }
 
+    pub fn map<F>(mut self, mut f: F) -> Self
+    where
+        F: FnMut(Option<usize>) -> Option<usize>,
+    {
+        self.map.values_mut().for_each(|limit| *limit = f(*limit));
+        self
+    }
+
     pub fn cast(
         &self,
         start: UncheckedSpace,
@@ -127,6 +135,12 @@ impl Rays {
         builders.into_iter().for_each(|builder| self.add(builder))
     }
 
+    pub fn add_set(&mut self, other: Rays) {
+        other.map.into_iter().for_each(|(direction, limit)| {
+            self.map.insert(direction, limit);
+        })
+    }
+
     pub fn with(mut self, builder: RayBuilder<DirectionBoxed>) -> Self {
         self.add(builder);
         self
@@ -137,6 +151,11 @@ impl Rays {
         builders: impl IntoIterator<Item = RayBuilder<DirectionBoxed>>,
     ) -> Self {
         self.add_many(builders);
+        self
+    }
+
+    pub fn with_set(mut self, other: Rays) -> Self {
+        self.add_set(other);
         self
     }
 }

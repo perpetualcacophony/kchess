@@ -1,3 +1,5 @@
+use crate::ChessSide;
+
 use super::{Cardinal, Direction, DirectionBoxed, DirectionExt, DirectionSlice};
 
 pub type DirectionArray<const N: usize> = Direction<[Cardinal; N]>;
@@ -9,6 +11,10 @@ impl<const N: usize> DirectionArray<N> {
 
     pub fn boxed(&self) -> DirectionBoxed {
         DirectionBoxed::from_cardinals(self.cardinals.into())
+    }
+
+    pub fn relative(&self, side: ChessSide) -> DirectionBoxed {
+        self.as_slice().relative(side)
     }
 }
 
