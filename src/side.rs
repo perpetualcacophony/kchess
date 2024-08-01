@@ -31,17 +31,16 @@ impl ChessSide {
     }
 
     #[cfg(feature = "rand")]
-    pub fn choose_with<R: rand::Rng>(rng: &mut R) -> Self {
-        use rand::seq::IteratorRandom;
+    pub fn choose_with<R: rand::Rng>(rng: &mut R, count: usize) -> Self {
+        use rand::seq::SliceRandom;
 
-        Self::ARRAY
-            .into_iter()
+        *Self::vec(count)
             .choose(rng)
             .expect("array should not be empty")
     }
 
     #[cfg(feature = "rand_full")]
-    pub fn choose() -> Self {
-        Self::choose_with(&mut rand::thread_rng())
+    pub fn choose(count: usize) -> Self {
+        Self::choose_with(&mut rand::thread_rng(), count)
     }
 }
