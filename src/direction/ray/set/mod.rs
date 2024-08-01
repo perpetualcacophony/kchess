@@ -7,7 +7,11 @@ pub use builder::RaySetBuilder;
 
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RaySet {
+    #[cfg(not(feature = "smallvec"))]
     rays: Vec<Ray>,
+
+    #[cfg(feature = "smallvec")]
+    rays: smallvec::SmallVec<[Ray; 8]>,
 }
 
 impl RaySet {
