@@ -4,6 +4,8 @@ use crate::{pieces::PieceKind, UncheckedSpace};
 
 use super::{Cast, Ray, RayBuilder};
 
+mod builder;
+
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct RaySet {
     rays: Vec<Ray>,
