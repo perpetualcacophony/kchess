@@ -1,8 +1,4 @@
-use crate::direction::{
-    self, cardinal, diagonal,
-    ray::{RayOwned, RaySet},
-    Cardinal, Direction,
-};
+use crate::direction::{self, cardinal, diagonal, ray::RaySet, Cardinal, Direction};
 
 use super::{bishop, rook};
 
@@ -17,8 +13,6 @@ pub fn directions() -> [QueenDirection; 8] {
     .try_into()
     .unwrap()
 }
-
-pub type QueenRay = RayOwned;
 
 pub fn rays() -> RaySet {
     RaySet::new()

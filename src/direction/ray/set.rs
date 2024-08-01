@@ -1,6 +1,6 @@
 use crate::{direction::DirectionBoxed, UncheckedSpace};
 
-use super::{RayBuilder, RaySlice};
+use super::{Ray, RayBuilder};
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct RaySet {
@@ -86,11 +86,11 @@ impl<'a> Iter<'a> {
 }
 
 impl<'a> Iterator for Iter<'a> {
-    type Item = RaySlice<'a>;
+    type Item = Ray<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner
             .next()
-            .map(|(direction, limit)| RaySlice::new(*limit, direction.as_slice()))
+            .map(|(direction, limit)| Ray::new(*limit, direction.as_slice()))
     }
 }

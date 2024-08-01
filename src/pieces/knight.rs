@@ -1,5 +1,5 @@
 use crate::direction::{
-    ray::{RayBuilder, RayOwned, RaySet},
+    ray::{RayBuilder, RaySet},
     Cardinal, DirectionArray,
 };
 
@@ -16,8 +16,6 @@ pub fn new(long: Cardinal, short: Cardinal) -> DirectionArray<3> {
 pub fn directions() -> [DirectionArray<3>; 8] {
     Cardinal::ARRAY.map(from_long).concat().try_into().unwrap()
 }
-
-pub type KnightRay = RayOwned;
 
 pub fn rays() -> RaySet {
     RaySet::new()
