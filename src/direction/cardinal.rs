@@ -1,4 +1,4 @@
-use super::DirectionCardinal;
+use super::{Direction, Step};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Cardinal {
@@ -95,12 +95,23 @@ impl std::ops::Not for Cardinal {
     }
 }
 
-pub const NORTH: &DirectionCardinal = &DirectionCardinal::new(Cardinal::NORTH);
-pub const EAST: &DirectionCardinal = &DirectionCardinal::new(Cardinal::EAST);
-pub const SOUTH: &DirectionCardinal = &DirectionCardinal::new(Cardinal::SOUTH);
-pub const WEST: &DirectionCardinal = &DirectionCardinal::new(Cardinal::WEST);
+impl Direction for Cardinal {
+    fn as_step(&self) -> Step {
+        let ranks = match *self {
+            Self::NORTH => 1,
+            Self::SOUTH => -1,
+            _ => 0,
+        };
 
-pub const ARRAY: [&DirectionCardinal; 4] = [NORTH, EAST, SOUTH, WEST];
+        let files = match *self {
+            Self::EAST => 1,
+            Self::WEST => -1,
+            _ => 0,
+        };
+
+        Step::new(ranks, files)
+    }
+}
 
 #[cfg(test)]
 mod tests {

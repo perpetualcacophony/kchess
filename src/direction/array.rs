@@ -1,6 +1,6 @@
 use crate::ChessSide;
 
-use super::{Cardinal, Direction, DirectionBoxed, DirectionExt, DirectionSlice};
+use super::{Cardinal, Direction, DirectionBoxed, Direction, DirectionSlice};
 
 pub type DirectionArray<const N: usize> = Direction<[Cardinal; N]>;
 
@@ -30,7 +30,7 @@ impl DirectionArray<2> {
     }
 }
 
-impl<const N: usize> DirectionExt for DirectionArray<N> {
+impl<const N: usize> Direction for DirectionArray<N> {
     fn next_space(&self, start: crate::UncheckedSpace) -> crate::UncheckedSpace {
         self.as_slice().next_space(start)
     }

@@ -1,10 +1,10 @@
-use crate::{direction::DirectionBoxed, UncheckedSpace};
+use crate::UncheckedSpace;
 
 use super::{Ray, RayBuilder};
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct RaySet {
-    map: std::collections::HashMap<DirectionBoxed, Option<usize>>,
+    rays: Vec<Ray>,
 }
 
 impl RaySet {
@@ -20,7 +20,9 @@ impl RaySet {
     where
         F: FnMut(Option<usize>) -> Option<usize>,
     {
-        self.map.values_mut().for_each(|limit| *limit = f(*limit));
+        self.rays
+            .iter_mut()
+            .for_each(|ray| ray.limit = f(ray.limit));
         self
     }
 
@@ -31,29 +33,28 @@ impl RaySet {
         self.iter().map(move |ray| ray.cast(start))
     }
 
-    pub fn add(&mut self, builder: RayBuilder<DirectionBoxed>) {
-        self.map.insert(builder.direction, builder.limit);
+    pub fn add(&mut self, builder: RayBuilder) {
+        if let Some(index) = self.rays.iter().position(|ray| ray.step == builder.step) {
+            self.rays.remove(index);
+        }
+
+        self.rays.push(Ray::from_builder(builder))
     }
 
-    pub fn add_many(&mut self, builders: impl IntoIterator<Item = RayBuilder<DirectionBoxed>>) {
+    pub fn add_many(&mut self, builders: impl IntoIterator<Item = RayBuilder>) {
         builders.into_iter().for_each(|builder| self.add(builder))
     }
 
     pub fn add_set(&mut self, other: RaySet) {
-        other.map.into_iter().for_each(|(direction, limit)| {
-            self.map.insert(direction, limit);
-        })
+        other.into_iter().for_each(|ray| self.add(ray.to_builder()))
     }
 
-    pub fn with(mut self, builder: RayBuilder<DirectionBoxed>) -> Self {
+    pub fn with(mut self, builder: RayBuilder) -> Self {
         self.add(builder);
         self
     }
 
-    pub fn with_many(
-        mut self,
-        builders: impl IntoIterator<Item = RayBuilder<DirectionBoxed>>,
-    ) -> Self {
+    pub fn with_many(mut self, builders: impl IntoIterator<Item = RayBuilder>) -> Self {
         self.add_many(builders);
         self
     }
@@ -74,23 +75,21 @@ impl<'a> IntoIterator for &'a RaySet {
 }
 
 pub struct Iter<'a> {
-    inner: std::collections::hash_map::Iter<'a, DirectionBoxed, Option<usize>>,
+    inner: std::slice::Iter<'a, Ray>,
 }
 
 impl<'a> Iter<'a> {
     fn new(set: &'a RaySet) -> Self {
         Self {
-            inner: set.map.iter(),
+            inner: set.rays.iter(),
         }
     }
 }
 
 impl<'a> Iterator for Iter<'a> {
-    type Item = Ray<'a>;
+    type Item = &'a Ray;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.inner
-            .next()
-            .map(|(direction, limit)| Ray::new(*limit, direction.as_slice()))
+        self.inner.next()
     }
 }

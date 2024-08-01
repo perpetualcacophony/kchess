@@ -1,4 +1,4 @@
-use super::{DirectionExt, DirectionSlice};
+use super::Step;
 use crate::UncheckedSpace;
 
 mod builder;
@@ -7,47 +7,53 @@ pub use builder::RayBuilder;
 pub mod set;
 pub use set::RaySet;
 
-pub type RayStatic = Ray<'static>;
-
-pub struct Ray<'a> {
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Ray {
     limit: Option<usize>,
-    direction: DirectionSlice<'a>,
+    step: Step,
 }
 
-impl<'a> Ray<'a> {
-    pub const fn new(limit: Option<usize>, direction: DirectionSlice<'a>) -> Self {
-        Self { limit, direction }
+impl Ray {
+    pub const fn new(limit: Option<usize>, step: Step) -> Self {
+        Self { limit, step }
     }
 
-    pub const fn from_builder(builder: RayBuilder<DirectionSlice<'a>>) -> Self {
-        Self::new(builder.limit, builder.direction)
+    pub const fn from_builder(builder: RayBuilder) -> Self {
+        Self::new(builder.limit, builder.step)
     }
 
-    const fn steps(self) -> Steps<'a> {
+    const fn steps(&self) -> Steps {
         Steps::new(self)
     }
 
-    pub fn cast(self, start: UncheckedSpace) -> Cast<'a> {
+    pub fn cast(&self, start: UncheckedSpace) -> Cast {
         Cast::new(self, start)
+    }
+
+    pub fn to_builder(self) -> RayBuilder {
+        RayBuilder {
+            step: self.step,
+            limit: self.limit,
+        }
     }
 }
 
 struct Steps<'ray> {
     limit: Option<usize>,
-    direction: DirectionSlice<'ray>,
+    step: &'ray Step,
 }
 
 impl<'ray> Steps<'ray> {
-    const fn new(ray: Ray<'ray>) -> Self {
+    const fn new(ray: &'ray Ray) -> Self {
         Self {
             limit: ray.limit,
-            direction: ray.direction,
+            step: &ray.step,
         }
     }
 }
 
 impl<'ray> Iterator for Steps<'ray> {
-    type Item = DirectionSlice<'ray>;
+    type Item = &'ray Step;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(limit) = self.limit.as_mut() {
@@ -58,7 +64,7 @@ impl<'ray> Iterator for Steps<'ray> {
             }
         }
 
-        Some(self.direction)
+        Some(self.step)
     }
 }
 
@@ -73,12 +79,16 @@ pub struct Cast<'ray> {
 }
 
 impl<'ray> Cast<'ray> {
-    fn new(ray: Ray<'ray>, start: UncheckedSpace) -> Self {
+    fn new(ray: &'ray Ray, start: UncheckedSpace) -> Self {
         Self {
             inner: ray.steps().scan(start, |start, step| {
-                *start = step.next_space(*start);
+                if let Some(next) = step.next_space(*start) {
+                    *start = next;
 
-                Some(*start)
+                    Some(next)
+                } else {
+                    None
+                }
             }),
         }
     }

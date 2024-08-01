@@ -1,21 +1,25 @@
+use crate::Direction;
+
+use super::Step;
+
 #[derive(Debug, Copy, Clone)]
-pub struct RayBuilder<Direction> {
+pub struct RayBuilder {
     pub(super) limit: Option<usize>,
-    pub(super) direction: Direction,
+    pub(super) step: Step,
 }
 
-impl<Direction> RayBuilder<Direction> {
-    pub const fn new(direction: Direction) -> Self {
+impl RayBuilder {
+    pub fn new(direction: impl Direction) -> Self {
         Self {
-            direction,
             limit: None,
+            step: direction.as_step(),
         }
     }
 
     pub fn limit(self, limit: usize) -> Self {
         Self {
-            direction: self.direction,
             limit: Some(limit),
+            step: self.step,
         }
     }
 

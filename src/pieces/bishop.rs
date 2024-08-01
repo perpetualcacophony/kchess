@@ -1,10 +1,8 @@
 use crate::direction::{
-    diagonal,
-    ray::{RayBuilder, RaySet, RayStatic},
+    ray::{RayBuilder, RaySet},
+    Diagonal,
 };
 
-pub type BishopRay = RayStatic;
-
 pub fn rays() -> RaySet {
-    RaySet::new().with_many(diagonal::ARRAY.map(|diagonal| RayBuilder::new(diagonal.boxed())))
+    RaySet::new().with_many(Diagonal::ARRAY.map(RayBuilder::new))
 }

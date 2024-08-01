@@ -1,4 +1,4 @@
-use crate::direction::{Cardinal, DirectionExt};
+use crate::direction::{Cardinal, Direction};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Space {
@@ -45,18 +45,7 @@ impl UncheckedSpace {
         Self { rank, file }
     }
 
-    pub(super) fn step_cardinal(mut self, cardinal: Cardinal) -> Self {
-        match cardinal {
-            Cardinal::North => self.file += 1,
-            Cardinal::East => self.rank += 1,
-            Cardinal::South => self.file -= 1,
-            Cardinal::West => self.rank -= 1,
-        };
-
-        self
-    }
-
-    pub fn step<Cardinals>(self, direction: impl DirectionExt) -> Self {
-        direction.next_space(self)
+    pub fn step<Cardinals>(self, direction: impl Direction) -> Self {
+        direction.next_space(self).unwrap()
     }
 }

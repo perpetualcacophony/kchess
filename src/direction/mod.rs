@@ -1,109 +1,91 @@
 pub mod cardinal;
 
+use std::ops::{Add, Mul, Neg};
+
 pub use cardinal::Cardinal;
 
-pub mod diagonal;
+mod diagonal;
+pub use diagonal::Diagonal;
 
 pub mod ray;
 
-pub mod slice;
-pub use slice::DirectionSlice;
+use crate::{ChessSide, UncheckedSpace};
 
-pub mod boxed;
-pub use boxed::DirectionBoxed;
+pub trait Direction {
+    fn as_step(&self) -> Step;
 
-pub mod array;
-pub use array::DirectionArray;
-
-use crate::UncheckedSpace;
-
-pub trait DirectionExt {
-    fn next_space(&self, start: UncheckedSpace) -> UncheckedSpace;
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Hash, Eq)]
-pub struct Direction<Cardinals> {
-    cardinals: Cardinals,
-}
-
-impl<Cardinals> Direction<Cardinals> {
-    pub const fn from_cardinals(cardinals: Cardinals) -> Self {
-        Self { cardinals }
+    fn next_space(&self, start: UncheckedSpace) -> Option<UncheckedSpace> {
+        self.as_step().next_space(start)
     }
 
-    pub fn map<NewCardinals, F>(self, mut f: F) -> Direction<NewCardinals>
+    fn relative(self, side: ChessSide) -> Relative<Self>
     where
-        F: FnMut(Cardinals) -> NewCardinals,
+        Self: Sized,
     {
-        Direction::from_cardinals(f(self.cardinals))
+        Relative::new(self, side)
     }
 }
 
-impl<'a> IntoIterator for DirectionSlice<'a> {
-    type Item = Cardinal;
-    type IntoIter = std::iter::Copied<std::slice::Iter<'a, Cardinal>>;
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Step {
+    ranks: isize,
+    files: isize,
+}
 
-    fn into_iter(self) -> Self::IntoIter {
-        self.cardinals.iter().copied()
+impl Step {
+    pub fn new(ranks: isize, files: isize) -> Self {
+        Self { ranks, files }
+    }
+
+    pub fn rotate_cw_once(self) -> Self {
+        Self::new(self.files, self.ranks.neg())
+    }
+
+    pub fn rotate_cw(self, turns: usize) -> Self {
+        (0..turns).fold(self, |step, _| step.rotate_cw_once())
     }
 }
 
-#[derive(Clone, Debug, Copy)]
-pub enum OneOrTwo<T> {
-    One([T; 1]),
-    Two([T; 2]),
-}
-
-impl<T> OneOrTwo<T> {
-    fn as_slice(&self) -> &[T] {
-        match self {
-            Self::One(array) => array,
-            Self::Two(array) => array,
-        }
-    }
-
-    fn iter(&self) -> std::slice::Iter<T> {
-        self.as_slice().iter()
+impl Step {
+    pub fn next_space(&self, start: UncheckedSpace) -> Option<UncheckedSpace> {
+        Some(UncheckedSpace::new(
+            start.rank.checked_add_signed(self.ranks)?,
+            start.file.checked_add_signed(self.files)?,
+        ))
     }
 }
 
-impl<'a, T: 'a> IntoIterator for &'a OneOrTwo<T> {
-    type Item = &'a T;
-    type IntoIter = std::slice::Iter<'a, T>;
+impl Add for Step {
+    type Output = Self;
 
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::new(self.ranks + rhs.ranks, self.files + rhs.files)
     }
 }
 
-impl<T: Clone> From<OneOrTwo<T>> for Vec<T> {
-    fn from(value: OneOrTwo<T>) -> Self {
-        match value {
-            OneOrTwo::One(array) => array.to_vec(),
-            OneOrTwo::Two(array) => array.to_vec(),
-        }
+impl Mul<isize> for Step {
+    type Output = Self;
+
+    fn mul(self, rhs: isize) -> Self::Output {
+        Self::new(self.ranks * rhs, self.files * rhs)
     }
 }
 
-pub type DirectionCardinal = DirectionArray<1>;
-pub type DirectionDiagonal = DirectionArray<2>;
+pub struct Relative<D> {
+    direction: D,
+    side: ChessSide,
+}
 
-impl DirectionDiagonal {
-    pub const fn diagonal(a: Cardinal, b: Cardinal) -> Self {
-        diagonal::new(a, b)
-    }
-
-    pub const fn diagonal_ne(north: bool, east: bool) -> Self {
-        diagonal::new_ne(north, east)
+impl<D> Relative<D> {
+    pub fn new(direction: D, side: ChessSide) -> Self {
+        Self { direction, side }
     }
 }
 
-impl Direction<OneOrTwo<Cardinal>> {
-    pub fn as_slice(&self) -> DirectionSlice {
-        DirectionSlice::from_cardinals(self.cardinals.as_slice())
-    }
-
-    pub fn into_boxed(self) -> DirectionBoxed {
-        self.as_slice().into_boxed()
+impl<D: Direction> Direction for Relative<D> {
+    fn as_step(&self) -> Step {
+        self.direction
+            .as_step()
+            .rotate_cw(Cardinal::NORTH.turns_cw(self.side.forward_cardinal()))
     }
 }

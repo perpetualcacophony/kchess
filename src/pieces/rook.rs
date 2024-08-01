@@ -1,10 +1,8 @@
 use crate::direction::{
-    cardinal,
-    ray::{RayBuilder, RaySet, RayStatic},
+    ray::{RayBuilder, RaySet},
+    Cardinal,
 };
 
-pub type RookRay = RayStatic;
-
 pub fn rays() -> RaySet {
-    RaySet::new().with_many(cardinal::ARRAY.map(|cardinal| RayBuilder::new(cardinal.boxed())))
+    RaySet::new().with_many(Cardinal::ARRAY.map(RayBuilder::new))
 }

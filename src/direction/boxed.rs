@@ -1,4 +1,4 @@
-use super::{Cardinal, Direction, DirectionExt, DirectionSlice};
+use super::{Cardinal, Direction, Direction, DirectionSlice};
 
 pub type DirectionBoxed = Direction<Box<[Cardinal]>>;
 
@@ -17,7 +17,7 @@ impl DirectionBoxed {
     }
 }
 
-impl DirectionExt for DirectionBoxed {
+impl Direction for DirectionBoxed {
     fn next_space(&self, start: crate::UncheckedSpace) -> crate::UncheckedSpace {
         self.as_slice().next_space(start)
     }

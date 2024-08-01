@@ -1,23 +1,48 @@
-use crate::direction::{
-    ray::{RayBuilder, RaySet},
-    Cardinal, DirectionArray,
+use crate::{
+    direction::{
+        ray::{RayBuilder, RaySet},
+        Cardinal,
+    },
+    Direction,
 };
 
-pub fn from_long(long: Cardinal) -> [DirectionArray<3>; 2] {
-    long.perpendicular().map(|cardinal| new(long, cardinal))
+#[derive(Clone, Copy, Debug)]
+pub struct KnightDirection {
+    long: Cardinal,
+    short: Cardinal,
 }
 
-pub fn new(long: Cardinal, short: Cardinal) -> DirectionArray<3> {
-    assert!(long.perpendicular_to(short));
+impl KnightDirection {
+    pub fn try_new(long: Cardinal, short: Cardinal) -> Option<Self> {
+        long.perpendicular_to(short)
+            .then_some(Self::new(long, short))
+    }
 
-    DirectionArray::from_cardinals([long, long, short])
+    pub fn new(long: Cardinal, short: Cardinal) -> Self {
+        assert!(long.perpendicular_to(short));
+        Self { long, short }
+    }
+
+    pub fn from_long(long: Cardinal) -> [Self; 2] {
+        long.perpendicular().map(|short| Self::new(long, short))
+    }
+
+    pub fn array() -> [Self; 8] {
+        Cardinal::ARRAY
+            .map(Self::from_long)
+            .concat()
+            .try_into()
+            .unwrap()
+    }
 }
 
-pub fn directions() -> [DirectionArray<3>; 8] {
-    Cardinal::ARRAY.map(from_long).concat().try_into().unwrap()
+impl Direction for KnightDirection {
+    fn as_step(&self) -> crate::direction::Step {
+        self.long.as_step() * 2 + self.short.as_step()
+    }
 }
 
 pub fn rays() -> RaySet {
     RaySet::new()
-        .with_many(directions().map(|direction| RayBuilder::new(direction.boxed()).limit(1)))
+        .with_many(KnightDirection::array().map(|direction| RayBuilder::new(direction).once()))
 }

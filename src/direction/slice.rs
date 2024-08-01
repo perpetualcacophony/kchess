@@ -1,6 +1,6 @@
 use crate::{ChessSide, UncheckedSpace};
 
-use super::{Cardinal, Direction, DirectionBoxed, DirectionExt};
+use super::{Cardinal, Direction, DirectionBoxed, Direction};
 
 pub type DirectionSlice<'a> = Direction<&'a [Cardinal]>;
 
@@ -41,7 +41,7 @@ impl<'a> DirectionSlice<'a> {
     }
 }
 
-impl<'a> DirectionExt for DirectionSlice<'a> {
+impl<'a> Direction for DirectionSlice<'a> {
     fn next_space(&self, start: UncheckedSpace) -> UncheckedSpace {
         self.into_iter().fold(start, UncheckedSpace::step_cardinal)
     }
