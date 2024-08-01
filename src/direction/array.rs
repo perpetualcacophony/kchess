@@ -1,10 +1,14 @@
-use super::{Cardinal, Direction, DirectionExt, DirectionSlice};
+use super::{Cardinal, Direction, DirectionBoxed, DirectionExt, DirectionSlice};
 
 pub type DirectionArray<const N: usize> = Direction<[Cardinal; N]>;
 
 impl<const N: usize> DirectionArray<N> {
     pub fn as_slice(&self) -> DirectionSlice<'_> {
         DirectionSlice::from_cardinals(self.cardinals.as_slice())
+    }
+
+    pub fn boxed(&self) -> DirectionBoxed {
+        DirectionBoxed::from_cardinals(self.cardinals.into())
     }
 }
 

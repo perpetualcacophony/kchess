@@ -10,13 +10,5 @@ pub fn rays() -> [BishopRay; 4] {
 }
 
 pub fn rays_new() -> Rays {
-    let mut rays = Rays::new();
-
-    rays.insert_many(
-        diagonal::ARRAY
-            .map(|dir| dir.as_slice().into_boxed())
-            .map(RayBuilder::new),
-    );
-
-    rays
+    Rays::new().with_many(diagonal::ARRAY.map(|diagonal| RayBuilder::new(diagonal.boxed())))
 }

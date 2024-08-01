@@ -106,7 +106,7 @@ impl Rays {
         Self::default()
     }
 
-    pub fn rays(&self) -> impl Iterator<Item = RaySlice> {
+    pub fn iter(&self) -> impl Iterator<Item = RaySlice> {
         self.map
             .iter()
             .map(|(direction, limit)| RaySlice::new(*limit, direction.as_slice()))
@@ -116,16 +116,27 @@ impl Rays {
         &self,
         start: UncheckedSpace,
     ) -> impl Iterator<Item = impl Iterator<Item = UncheckedSpace> + '_> + '_ {
-        self.rays().map(move |ray| ray.cast(start))
+        self.iter().map(move |ray| ray.cast(start))
     }
 
-    pub fn insert(&mut self, builder: RayBuilder<DirectionBoxed>) {
+    pub fn add(&mut self, builder: RayBuilder<DirectionBoxed>) {
         self.map.insert(builder.direction, builder.limit);
     }
 
-    pub fn insert_many(&mut self, builders: impl IntoIterator<Item = RayBuilder<DirectionBoxed>>) {
-        builders
-            .into_iter()
-            .for_each(|builder| self.insert(builder))
+    pub fn add_many(&mut self, builders: impl IntoIterator<Item = RayBuilder<DirectionBoxed>>) {
+        builders.into_iter().for_each(|builder| self.add(builder))
+    }
+
+    pub fn with(mut self, builder: RayBuilder<DirectionBoxed>) -> Self {
+        self.add(builder);
+        self
+    }
+
+    pub fn with_many(
+        mut self,
+        builders: impl IntoIterator<Item = RayBuilder<DirectionBoxed>>,
+    ) -> Self {
+        self.add_many(builders);
+        self
     }
 }
