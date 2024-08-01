@@ -20,12 +20,8 @@ pub fn directions() -> [QueenDirection; 8] {
 
 pub type QueenRay = RayOwned;
 
-pub fn rays() -> [QueenRay; 8] {
-    directions().map(|direction| QueenRay::new(None, direction.into_boxed()))
-}
-
-pub fn rays_new() -> RaySet {
+pub fn rays() -> RaySet {
     RaySet::new()
-        .with_set(bishop::rays_new())
-        .with_set(rook::rays_new())
+        .with_set(bishop::rays())
+        .with_set(rook::rays())
 }

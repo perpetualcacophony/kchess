@@ -1,5 +1,5 @@
 use crate::{
-    direction::ray::{RayOwned as Ray, RayStatic},
+    direction::ray::{RayOwned as Ray, RaySet, RayStatic},
     ChessSide,
 };
 
@@ -21,8 +21,8 @@ pub struct ChessPiece {
     pub can_promote: bool,
     pub valid_promotion: bool,
     pub checkmate_possible: bool,
-    pub rays: Vec<Ray>,
-    pub capture_rays: Option<Vec<Ray>>,
+    pub rays: RaySet,
+    pub capture_rays: Option<RaySet>,
 }
 
 impl ChessPiece {
@@ -32,8 +32,8 @@ impl ChessPiece {
             can_promote: true,
             valid_promotion: false,
             checkmate_possible: false,
-            rays: vec![pawn::step_ray(side, moved)],
-            capture_rays: Some(pawn::capture_rays(side).to_vec()),
+            rays: pawn::step_ray(side, moved),
+            capture_rays: Some(pawn::capture_rays(side)),
         }
     }
 
@@ -43,7 +43,7 @@ impl ChessPiece {
             can_promote: false,
             valid_promotion: true,
             checkmate_possible: false,
-            rays: knight::rays().to_vec(),
+            rays: knight::rays(),
             capture_rays: None,
         }
     }
@@ -54,7 +54,7 @@ impl ChessPiece {
             can_promote: false,
             valid_promotion: true,
             checkmate_possible: false,
-            rays: bishop::rays().map(RayStatic::into_owned).to_vec(),
+            rays: bishop::rays(),
             capture_rays: None,
         }
     }
@@ -65,7 +65,7 @@ impl ChessPiece {
             can_promote: false,
             valid_promotion: true,
             checkmate_possible: false,
-            rays: rook::rays().map(RayStatic::into_owned).to_vec(),
+            rays: rook::rays(),
             capture_rays: None,
         }
     }
@@ -76,7 +76,7 @@ impl ChessPiece {
             can_promote: false,
             valid_promotion: true,
             checkmate_possible: false,
-            rays: queen::rays().to_vec(),
+            rays: queen::rays(),
             capture_rays: None,
         }
     }
@@ -87,7 +87,7 @@ impl ChessPiece {
             can_promote: false,
             valid_promotion: false,
             checkmate_possible: true,
-            rays: king::rays().to_vec(),
+            rays: king::rays(),
             capture_rays: None,
         }
     }

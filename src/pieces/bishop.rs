@@ -5,10 +5,6 @@ use crate::direction::{
 
 pub type BishopRay = RayStatic;
 
-pub fn rays() -> [BishopRay; 4] {
-    diagonal::ARRAY.map(|dir| BishopRay::new(None, dir.as_slice()))
-}
-
-pub fn rays_new() -> RaySet {
+pub fn rays() -> RaySet {
     RaySet::new().with_many(diagonal::ARRAY.map(|diagonal| RayBuilder::new(diagonal.boxed())))
 }

@@ -96,7 +96,7 @@ impl<'ray> Iterator for Iter<'ray> {
     }
 }
 
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct RaySet {
     map: std::collections::HashMap<DirectionBoxed, Option<usize>>,
 }
