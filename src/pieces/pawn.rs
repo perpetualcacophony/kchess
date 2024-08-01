@@ -1,6 +1,6 @@
 use crate::{
     direction::{
-        ray::{RayBuilder, RaySet},
+        ray::{RayBuilder, RaySetBuilder},
         Cardinal, Diagonal,
     },
     ChessSide, Direction,
@@ -18,7 +18,7 @@ impl PieceKind for Pawn {
     const CAN_PROMOTE: bool = true;
     const VALID_PROMOTION: bool = false;
 
-    fn add_rays<'rays>(&self, set: &'rays mut RaySet) -> &'rays mut RaySet {
+    fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
         let limit = if self.moved { 1 } else { 2 };
 
         set.add(RayBuilder::new(Diagonal::NORTHEAST.relative(self.side)).once())

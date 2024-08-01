@@ -1,6 +1,6 @@
 use crate::{
     direction::{
-        ray::{RayBuilder, RaySet},
+        ray::{RayBuilder, RaySetBuilder},
         Cardinal,
     },
     Direction,
@@ -49,7 +49,7 @@ pub struct Knight;
 impl PieceKind for Knight {
     const VALUE: usize = 2;
 
-    fn add_rays<'rays>(&self, set: &'rays mut RaySet) -> &'rays mut RaySet {
+    fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
         set.add_many(KnightDirection::array().map(|direction| RayBuilder::new(direction).limit(1)))
     }
 }

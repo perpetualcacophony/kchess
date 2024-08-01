@@ -5,7 +5,7 @@ mod builder;
 pub use builder::RayBuilder;
 
 pub mod set;
-pub use set::RaySet;
+pub use set::{RaySet, RaySetBuilder};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Ray {

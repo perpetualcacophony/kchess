@@ -2,7 +2,7 @@ use crate::Direction;
 
 use super::Step;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct RayBuilder {
     pub(super) limit: Option<usize>,
     pub(super) step: Step,

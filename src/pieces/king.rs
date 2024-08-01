@@ -1,4 +1,4 @@
-use crate::direction::ray::{Ray, RaySet};
+use crate::direction::ray::RaySetBuilder;
 
 use super::{PieceKind, Queen};
 
@@ -9,8 +9,7 @@ impl PieceKind for King {
     const VALID_PROMOTION: bool = false;
     const CHECKMATE_POSSIBLE: bool = true;
 
-    fn add_rays<'rays>(&self, set: &'rays mut RaySet) -> &'rays mut RaySet {
-        set.add_piece(Queen)
-            .map(|ray| *ray = Ray::from_builder(ray.into_builder().limit(1)))
+    fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
+        set.add_piece(Queen).map(|ray| ray.limit(1))
     }
 }

@@ -1,10 +1,9 @@
-use std::borrow::Borrow;
+use crate::UncheckedSpace;
 
-use crate::{pieces::PieceKind, UncheckedSpace};
-
-use super::{Cast, Ray, RayBuilder};
+use super::{Cast, Ray};
 
 mod builder;
+pub use builder::RaySetBuilder;
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct RaySet {
@@ -20,59 +19,12 @@ impl RaySet {
         Iter::new(self)
     }
 
-    pub fn map<F>(&mut self, f: F) -> &mut Self
-    where
-        F: FnMut(&mut Ray),
-    {
-        self.rays.iter_mut().for_each(f);
-        self
+    pub fn from_builder(inner: impl FnOnce(&mut RaySetBuilder)) -> Self {
+        RaySetBuilder::new(inner).build()
     }
 
     pub fn cast(&self, start: UncheckedSpace) -> impl Iterator<Item = (&Ray, Cast<'_>)> + '_ {
         self.iter().map(move |ray| (ray, ray.cast(start)))
-    }
-
-    pub fn add(&mut self, builder: RayBuilder) -> &mut Self {
-        if let Some(index) = self.rays.iter().position(|ray| ray.step == builder.step) {
-            self.rays.remove(index);
-        }
-
-        self.rays.push(Ray::from_builder(builder));
-
-        self
-    }
-
-    pub fn add_many(&mut self, builders: impl IntoIterator<Item = RayBuilder>) -> &mut Self {
-        builders.into_iter().for_each(|builder| {
-            self.add(builder);
-        });
-        self
-    }
-
-    pub fn add_set(&mut self, other: RaySet) -> &mut Self {
-        other.into_iter().for_each(|ray| {
-            self.add(ray.into_builder());
-        });
-        self
-    }
-
-    pub fn add_piece<P: PieceKind>(&mut self, kind: impl Borrow<P>) -> &mut Self {
-        P::add_rays(kind.borrow(), self)
-    }
-
-    pub fn with(mut self, builder: RayBuilder) -> Self {
-        self.add(builder);
-        self
-    }
-
-    pub fn with_many(mut self, builders: impl IntoIterator<Item = RayBuilder>) -> Self {
-        self.add_many(builders);
-        self
-    }
-
-    pub fn with_set(mut self, other: RaySet) -> Self {
-        self.add_set(other);
-        self
     }
 }
 

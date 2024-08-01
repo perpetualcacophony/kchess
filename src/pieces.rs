@@ -1,6 +1,6 @@
 use std::borrow::Borrow;
 
-use crate::direction::ray::RaySet;
+use crate::direction::ray::{RaySet, RaySetBuilder};
 
 mod pawn;
 pub use pawn::Pawn;
@@ -31,15 +31,14 @@ pub struct PieceData {
 
 impl PieceData {
     pub fn from_kind<P: PieceKind>(piece: impl Borrow<P>) -> Self {
-        let mut rays = RaySet::new();
-        rays.add_piece(piece);
-
         Self {
             value: P::VALUE,
             can_promote: P::CAN_PROMOTE,
             valid_promotion: P::VALID_PROMOTION,
             checkmate_possible: P::CHECKMATE_POSSIBLE,
-            rays,
+            rays: RaySet::from_builder(|builder| {
+                piece.borrow().add_rays(builder);
+            }),
         }
     }
 }
@@ -50,5 +49,5 @@ pub trait PieceKind: Sized {
     const VALID_PROMOTION: bool = true;
     const CHECKMATE_POSSIBLE: bool = false;
 
-    fn add_rays<'rays>(&self, set: &'rays mut RaySet) -> &'rays mut RaySet;
+    fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder;
 }
