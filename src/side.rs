@@ -1,6 +1,6 @@
 use crate::direction::Cardinal;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Default)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Default, Hash)]
 pub struct ChessSide {
     inner: usize,
 }

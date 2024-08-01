@@ -1,6 +1,6 @@
 use crate::{
     direction::ray::{Ray, RayBuilder as Builder},
-    pieces::PieceKind,
+    pieces::PrimitivePiece,
 };
 
 use super::RaySet;
@@ -54,7 +54,7 @@ impl RaySetBuilder {
         self
     }
 
-    pub fn add_piece<P: PieceKind>(&mut self, kind: impl std::borrow::Borrow<P>) -> &mut Self {
+    pub fn add_piece<P: PrimitivePiece>(&mut self, kind: impl std::borrow::Borrow<P>) -> &mut Self {
         P::add_rays(kind.borrow(), self)
     }
 }

@@ -1,10 +1,10 @@
 use crate::direction::ray::RaySetBuilder;
 
-use super::{PieceKind, Queen};
+use super::{PrimitivePiece, Queen};
 
 pub struct King;
 
-impl PieceKind for King {
+impl PrimitivePiece for King {
     const VALUE: usize = usize::MAX;
     const VALID_PROMOTION: bool = false;
     const CHECKMATE_POSSIBLE: bool = true;

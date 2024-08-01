@@ -6,14 +6,15 @@ use crate::{
     ChessSide, Direction,
 };
 
-use super::PieceKind;
+use super::PrimitivePiece;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Pawn {
     moved: bool,
     side: ChessSide,
 }
 
-impl PieceKind for Pawn {
+impl PrimitivePiece for Pawn {
     const VALUE: usize = 1;
     const CAN_PROMOTE: bool = true;
     const VALID_PROMOTION: bool = false;

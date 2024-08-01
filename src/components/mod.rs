@@ -1,4 +1,7 @@
-use crate::{pieces::PieceData, ChessSide, Space};
+use crate::{
+    pieces::{Pawn, PieceData},
+    ChessSide, Space,
+};
 
 #[macro_use]
 mod macros;
@@ -13,9 +16,9 @@ pub mod side;
 pub use side::Side;
 
 #[derive(Clone, Debug, Default)]
-pub struct Components {
+pub struct Components<P> {
     space: Option<Space>,
-    piece: Option<PieceData>,
+    piece: Option<P>,
     side: Option<ChessSide>,
     captured: Option<bool>,
     moved: Option<bool>,

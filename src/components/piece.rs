@@ -1,12 +1,12 @@
-use crate::{game::AllPieces, pieces::PieceData, Board, ChessSide, Space};
+use crate::{game::AllPieces, Board, ChessSide, Space};
 
 use crate::game;
 
 bundle! {
-    Piece
+    Piece:
     moved: bool,
     space: Space,
-    piece: PieceData,
+    piece: P,
     side: ChessSide,
     captured: bool
 }

@@ -30,7 +30,7 @@ pub struct PieceData {
 }
 
 impl PieceData {
-    pub fn from_kind<P: PieceKind>(piece: impl Borrow<P>) -> Self {
+    pub fn from_primitive<P: PrimitivePiece>(piece: impl Borrow<P>) -> Self {
         Self {
             value: P::VALUE,
             can_promote: P::CAN_PROMOTE,
@@ -43,7 +43,7 @@ impl PieceData {
     }
 }
 
-pub trait PieceKind: Sized {
+pub trait PrimitivePiece: Sized {
     const VALUE: usize;
     const CAN_PROMOTE: bool = false;
     const VALID_PROMOTION: bool = true;
@@ -51,3 +51,66 @@ pub trait PieceKind: Sized {
 
     fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder;
 }
+
+pub trait PieceSet {
+    fn data(&self) -> PieceData;
+}
+
+pub struct Piece<Set> {
+    pub inner: Set,
+    pub data: PieceData,
+}
+
+impl<Set> Piece<Set>
+where
+    Set: PieceSet,
+{
+    pub fn new(inner: impl Into<Set>) -> Self {
+        let inner = inner.into();
+
+        Self {
+            data: inner.data(),
+            inner,
+        }
+    }
+}
+
+macro_rules! piece_set {
+    ($name:ident: $($primitive:ident),*) => {
+        pub enum $name {
+            $(
+                $primitive($primitive)
+            ),*
+        }
+
+        impl PieceSet for $name {
+            fn data(&self) -> PieceData {
+                match self {
+                    $(
+                        Self::$primitive(inner) => PieceData::from_primitive(inner)
+                    ),*
+                }
+            }
+        }
+
+        $(
+            impl From<$primitive> for $name {
+                fn from(value: $primitive) -> Self {
+                    Self::$primitive(value)
+                }
+            }
+        )*
+    };
+}
+
+piece_set! {
+    Standard:
+    Pawn,
+    Knight,
+    Bishop,
+    Rook,
+    Queen,
+    King
+}
+
+pub type StandardPiece = Piece<Standard>;

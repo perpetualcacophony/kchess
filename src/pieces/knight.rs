@@ -6,7 +6,7 @@ use crate::{
     Direction,
 };
 
-use super::PieceKind;
+use super::PrimitivePiece;
 
 #[derive(Clone, Copy, Debug)]
 pub struct KnightDirection {
@@ -46,7 +46,7 @@ impl Direction for KnightDirection {
 
 pub struct Knight;
 
-impl PieceKind for Knight {
+impl PrimitivePiece for Knight {
     const VALUE: usize = 2;
 
     fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {

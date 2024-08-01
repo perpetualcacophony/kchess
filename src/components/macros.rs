@@ -1,14 +1,14 @@
 macro_rules! bundle {
-    ($ident:ident $($field:ident: $type:ty),*) => {
+    ($ident:ident: $($field:ident: $type:ty),*) => {
         #[derive(Debug)]
-        pub struct $ident<'c> {
+        pub struct $ident<'c, P> {
             $(
                 pub $field: &'c $type
             ),*
         }
 
-        impl<'c> $ident<'c> {
-            pub fn get(components: &'c $crate::Components) -> Option<Self> {
+        impl<'c, P> $ident<'c, P> {
+            pub fn get(components: &'c $crate::Components<P>) -> Option<Self> {
                 Some( Self {
                     $(
                         $field: components.$field.as_ref()?
@@ -17,23 +17,23 @@ macro_rules! bundle {
             }
         }
 
-        impl<'c> AsRef<Self> for $ident<'c> {
+        impl<'c, P> AsRef<Self> for $ident<'c, P> {
             fn as_ref(&self) -> &Self {
                 self
             }
         }
     };
 
-    (mut $ident:ident $($field:ident: $type:ty),*) => {
+    (mut $ident:ident: $($field:ident: $type:ty),*) => {
         #[derive(Debug)]
-        pub struct $ident<'c> {
+        pub struct $ident<'c, P> {
             $(
                 pub $field: &'c mut $type
             ),*
         }
 
-        impl<'c> $ident<'c> {
-            pub fn get(components: &'c mut $crate::Components) -> Option<Self> {
+        impl<'c, P> $ident<'c, P> {
+            pub fn get(components: &'c mut $crate::Components<P>) -> Option<Self> {
                 Some( Self {
                     $(
                         $field: components.$field.as_mut()?
@@ -42,13 +42,13 @@ macro_rules! bundle {
             }
         }
 
-        impl<'c> AsRef<Self> for $ident<'c> {
+        impl<'c, P> AsRef<Self> for $ident<'c, P> {
             fn as_ref(&self) -> &Self {
                 self
             }
         }
 
-        impl<'c> AsMut<Self> for $ident<'c> {
+        impl<'c, P> AsMut<Self> for $ident<'c, P> {
             fn as_mut(&mut self) -> &mut Self {
                 self
             }

@@ -1,24 +1,27 @@
 use crate::{
-    pieces::{PieceData, Queen},
+    pieces::{Piece, PieceData, Queen},
     Board, ChessSide, Space,
 };
 
 bundle! {
-    mut PieceMut
+    mut PieceMut:
     moved: bool,
     space: Space,
-    piece: PieceData,
+    piece: P,
     side: ChessSide,
     captured: bool
 }
 
-impl<'c> PieceMut<'c> {
+impl<'c, P> PieceMut<'c, P>
+where
+    P: Piece,
+{
     pub fn capture(&mut self) {
         *self.captured = true;
     }
 
-    pub fn promote(&mut self) {
-        *self.piece = PieceData::from_kind(Queen)
+    pub fn promote(&mut self, into: P) {
+        *self.piece = into;
     }
 
     pub fn move_to(
