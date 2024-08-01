@@ -20,7 +20,7 @@ pub use queen::Queen;
 mod king;
 pub use king::King;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PieceData {
     pub value: usize,
     pub can_promote: bool,
@@ -56,6 +56,7 @@ pub trait PieceSet {
     fn data(&self) -> PieceData;
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Piece<Set> {
     pub inner: Set,
     pub data: PieceData,
@@ -75,6 +76,12 @@ where
     }
 }
 
+impl<Set> Piece<Set> {
+    pub fn rays(&self) -> &RaySet {
+        &self.data.rays
+    }
+}
+
 macro_rules! piece_set {
     ($name:ident: $($primitive:ident),*) => {
         pub enum $name {
@@ -87,7 +94,7 @@ macro_rules! piece_set {
             fn data(&self) -> PieceData {
                 match self {
                     $(
-                        Self::$primitive(inner) => PieceData::from_primitive(inner)
+                        Self::$primitive(inner) => PieceData::from_primitive::<$primitive>(inner)
                     ),*
                 }
             }

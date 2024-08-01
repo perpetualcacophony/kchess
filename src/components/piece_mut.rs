@@ -7,20 +7,17 @@ bundle! {
     mut PieceMut:
     moved: bool,
     space: Space,
-    piece: P,
+    piece: crate::pieces::Piece<P>,
     side: ChessSide,
     captured: bool
 }
 
-impl<'c, P> PieceMut<'c, P>
-where
-    P: Piece,
-{
+impl<'c, P> PieceMut<'c, P> {
     pub fn capture(&mut self) {
         *self.captured = true;
     }
 
-    pub fn promote(&mut self, into: P) {
+    pub fn promote(&mut self, into: crate::pieces::Piece<P>) {
         *self.piece = into;
     }
 
@@ -38,8 +35,8 @@ where
 
         *self.space = space;
 
-        if self.piece.can_promote && board.opposite_end(*self.side, *self.space) {
-            self.promote();
+        if self.piece.data.can_promote && board.opposite_end(*self.side, *self.space) {
+            self.promote(todo!());
         }
     }
 }

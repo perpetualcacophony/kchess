@@ -10,7 +10,7 @@ pub struct Side<'c> {
 impl<'c> Side<'c> {
     pub fn material(&self) -> usize {
         self.active_pieces()
-            .fold(0, |total, piece| total + piece.piece.value)
+            .fold(0, |total, piece| total + piece.piece.data.value)
     }
 
     pub fn active_pieces(&self) -> impl Iterator<Item = &Piece<'c>> {

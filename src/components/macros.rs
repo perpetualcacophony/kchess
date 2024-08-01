@@ -1,7 +1,7 @@
 macro_rules! bundle {
     ($ident:ident: $($field:ident: $type:ty),*) => {
         #[derive(Debug)]
-        pub struct $ident<'c, P> {
+        pub struct $ident<'c, P = crate::pieces::Standard> {
             $(
                 pub $field: &'c $type
             ),*

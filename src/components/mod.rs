@@ -1,5 +1,5 @@
 use crate::{
-    pieces::{Pawn, PieceData},
+    pieces::{Pawn, PieceData, Standard},
     ChessSide, Space,
 };
 
@@ -16,9 +16,9 @@ pub mod side;
 pub use side::Side;
 
 #[derive(Clone, Debug, Default)]
-pub struct Components<P> {
+pub struct Components<P = Standard> {
     space: Option<Space>,
-    piece: Option<P>,
+    piece: Option<crate::pieces::Piece<P>>,
     side: Option<ChessSide>,
     captured: Option<bool>,
     moved: Option<bool>,

@@ -5,7 +5,7 @@ use super::{Cast, Ray};
 mod builder;
 pub use builder::RaySetBuilder;
 
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RaySet {
     rays: Vec<Ray>,
 }

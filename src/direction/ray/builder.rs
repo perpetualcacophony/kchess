@@ -1,4 +1,4 @@
-use crate::Direction;
+use crate::{pieces::PieceSet, Direction};
 
 use super::Step;
 
@@ -7,6 +7,7 @@ pub struct RayBuilder {
     pub(super) limit: Option<usize>,
     pub(super) step: Step,
     pub(super) capture: bool,
+    pub(super) predicate: fn(&dyn PieceSet) -> bool,
 }
 
 impl RayBuilder {
@@ -15,6 +16,7 @@ impl RayBuilder {
             limit: None,
             step: direction.as_step(),
             capture: true,
+            predicate: |_| true,
         }
     }
 
@@ -29,6 +31,11 @@ impl RayBuilder {
 
     pub fn capture(mut self, capture: bool) -> Self {
         self.capture = capture;
+        self
+    }
+
+    pub fn predicate(mut self, predicate: fn(&dyn PieceSet) -> bool) -> Self {
+        self.predicate = predicate;
         self
     }
 }
