@@ -1,7 +1,6 @@
 use crate::direction::{
     diagonal,
-    ray::{RayBuilder, RaySlice, RayStatic, Rays},
-    DirectionArray, DirectionDiagonal,
+    ray::{RayBuilder, RayStatic, Rays},
 };
 
 pub type BishopRay = RayStatic;

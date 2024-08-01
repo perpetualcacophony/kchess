@@ -1,4 +1,4 @@
-use super::{Cardinal, Direction, DirectionBoxed, DirectionSlice};
+use super::{DirectionBoxed, DirectionExt, DirectionSlice};
 use crate::UncheckedSpace;
 
 mod builder;
@@ -57,7 +57,7 @@ impl RayOwned {
     }
 
     pub const fn as_borrowed(&self) -> RaySlice {
-        RaySlice::new(self.limit, self.direction.as_ref())
+        RaySlice::new(self.limit, self.direction.as_slice())
     }
 
     pub const fn iter(&self) -> Iter {
@@ -109,7 +109,7 @@ impl Rays {
     pub fn rays(&self) -> impl Iterator<Item = RaySlice> {
         self.map
             .iter()
-            .map(|(direction, limit)| RaySlice::new(*limit, direction.as_ref()))
+            .map(|(direction, limit)| RaySlice::new(*limit, direction.as_slice()))
     }
 
     pub fn cast(

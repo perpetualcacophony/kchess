@@ -1,4 +1,4 @@
-use crate::direction::{cardinal, ray::RayStatic, DirectionCardinal};
+use crate::direction::{cardinal, ray::RayStatic};
 
 pub type RookRay = RayStatic;
 
