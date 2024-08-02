@@ -6,3 +6,6 @@ pub use common_king::CommonKing;
 
 mod nightrider;
 pub use nightrider::Nightrider;
+
+mod knook;
+pub use knook::Knook;
