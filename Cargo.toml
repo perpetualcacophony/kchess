@@ -7,11 +7,12 @@ edition = "2021"
 rand = { version = "0.8.5", optional = true, default-features = false }
 smallvec = { version = "1.13.2", optional = true }
 
+[dev-dependencies]
+paste = "1.0.15"
+
 [features]
 default = []
 rand = ["dep:rand"]
 rand_full = ["rand", "rand/std", "rand/std_rng"]
 smallvec = ["dep:smallvec"]
-
-[dev-dependencies]
-paste = "1.0.15"
+fairy = []

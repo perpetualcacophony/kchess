@@ -20,6 +20,9 @@ pub use queen::Queen;
 mod king;
 pub use king::King;
 
+#[cfg(feature = "fairy")]
+pub mod fairy;
+
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PieceStats {
     pub value: usize,
