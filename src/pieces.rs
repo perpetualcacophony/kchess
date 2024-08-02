@@ -21,6 +21,25 @@ mod king;
 pub use king::King;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct PieceStats {
+    pub value: usize,
+    pub can_promote: bool,
+    pub valid_promotion: bool,
+    pub checkmate_possible: bool,
+}
+
+impl PieceStats {
+    pub fn from_primitive<P: PrimitivePiece>() -> Self {
+        Self {
+            value: P::VALUE,
+            can_promote: P::CAN_PROMOTE,
+            valid_promotion: P::VALID_PROMOTION,
+            checkmate_possible: P::CHECKMATE_POSSIBLE,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PieceData {
     pub value: usize,
     pub can_promote: bool,
@@ -54,6 +73,10 @@ pub trait PrimitivePiece: Sized {
 
 pub trait PieceSet {
     fn data(&self) -> PieceData;
+
+    fn promotions() -> Vec<Self>
+    where
+        Self: Sized;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -84,14 +107,15 @@ impl<Set> Piece<Set> {
 
 macro_rules! piece_set {
     ($name:ident: $($primitive:ident),*) => {
+        #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
         pub enum $name {
             $(
                 $primitive($primitive)
             ),*
         }
 
-        impl PieceSet for $name {
-            fn data(&self) -> PieceData {
+        impl $name {
+            fn piece_data(&self) -> PieceData {
                 match self {
                     $(
                         Self::$primitive(inner) => PieceData::from_primitive::<$primitive>(inner)
@@ -121,3 +145,21 @@ piece_set! {
 }
 
 pub type StandardPiece = Piece<Standard>;
+
+impl PieceSet for Standard {
+    fn data(&self) -> PieceData {
+        self.piece_data()
+    }
+
+    fn promotions() -> Vec<Self>
+    where
+        Self: Sized,
+    {
+        vec![
+            Self::Knight(Knight),
+            Self::Bishop(Bishop),
+            Self::Rook(Rook),
+            Self::Queen(Queen),
+        ]
+    }
+}

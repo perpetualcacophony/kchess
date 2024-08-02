@@ -44,6 +44,7 @@ impl Direction for KnightDirection {
     }
 }
 
+#[derive(Default, Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Knight;
 
 impl PrimitivePiece for Knight {

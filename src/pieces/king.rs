@@ -2,6 +2,7 @@ use crate::direction::ray::RaySetBuilder;
 
 use super::{PrimitivePiece, Queen};
 
+#[derive(Default, Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct King;
 
 impl PrimitivePiece for King {
