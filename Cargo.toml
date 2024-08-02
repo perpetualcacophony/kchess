@@ -11,7 +11,7 @@ smallvec = { version = "1.13.2", optional = true }
 paste = "1.0.15"
 
 [features]
-default = ["fairy"]
+default = []
 rand = ["dep:rand"]
 rand_full = ["rand", "rand/std", "rand/std_rng"]
 smallvec = ["dep:smallvec"]
