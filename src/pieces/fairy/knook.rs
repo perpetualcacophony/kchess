@@ -1,4 +1,4 @@
-use crate::pieces::PrimitivePiece;
+use crate::pieces::{standard, PrimitivePiece};
 
 pub struct Knook;
 
@@ -9,7 +9,6 @@ impl PrimitivePiece for Knook {
         &self,
         set: &'rays mut crate::direction::ray::RaySetBuilder,
     ) -> &'rays mut crate::direction::ray::RaySetBuilder {
-        set.add_piece(crate::pieces::Knight)
-            .add_piece(crate::pieces::Rook)
+        set.add_piece(standard::Knight).add_piece(standard::Rook)
     }
 }

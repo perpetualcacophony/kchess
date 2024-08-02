@@ -1,4 +1,4 @@
-use crate::pieces::PrimitivePiece;
+use crate::pieces::{standard, PrimitivePiece};
 
 pub struct CommonKing;
 
@@ -10,6 +10,6 @@ impl PrimitivePiece for CommonKing {
         &self,
         set: &'rays mut crate::direction::ray::RaySetBuilder,
     ) -> &'rays mut crate::direction::ray::RaySetBuilder {
-        set.add_piece(crate::pieces::King)
+        set.add_piece(standard::King)
     }
 }

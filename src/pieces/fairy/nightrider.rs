@@ -1,4 +1,4 @@
-use crate::pieces::PrimitivePiece;
+use crate::pieces::{standard, PrimitivePiece};
 
 pub struct Nightrider;
 
@@ -9,7 +9,7 @@ impl PrimitivePiece for Nightrider {
         &self,
         set: &'rays mut crate::direction::ray::RaySetBuilder,
     ) -> &'rays mut crate::direction::ray::RaySetBuilder {
-        set.add_piece(crate::pieces::Knight)
+        set.add_piece(standard::Knight)
             .map(|builder| builder.limit(None))
     }
 }

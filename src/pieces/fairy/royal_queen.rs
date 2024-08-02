@@ -1,4 +1,4 @@
-use crate::pieces::PrimitivePiece;
+use crate::pieces::{standard, PrimitivePiece};
 
 pub struct RoyalQueen;
 
@@ -11,6 +11,6 @@ impl PrimitivePiece for RoyalQueen {
         &self,
         set: &'rays mut crate::direction::ray::RaySetBuilder,
     ) -> &'rays mut crate::direction::ray::RaySetBuilder {
-        set.add_piece(crate::pieces::Queen)
+        set.add_piece(standard::Queen)
     }
 }
