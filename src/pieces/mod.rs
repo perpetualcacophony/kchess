@@ -2,23 +2,8 @@ use std::borrow::Borrow;
 
 use crate::direction::ray::{RaySet, RaySetBuilder};
 
-mod pawn;
-pub use pawn::Pawn;
-
-mod knight;
-pub use knight::Knight;
-
-mod bishop;
-pub use bishop::Bishop;
-
-mod rook;
-pub use rook::Rook;
-
-mod queen;
-pub use queen::Queen;
-
-mod king;
-pub use king::King;
+pub mod standard;
+pub use standard::{Bishop, King, Knight, Pawn, Queen, Rook};
 
 #[cfg(feature = "fairy")]
 pub mod fairy;
