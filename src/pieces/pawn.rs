@@ -26,7 +26,7 @@ impl PrimitivePiece for Pawn {
             .add(RayBuilder::new(Diagonal::NORTHEAST.relative(self.side)).once())
             .add(
                 RayBuilder::new(Cardinal::NORTH.relative(self.side))
-                    .limit(limit)
+                    .some_limit(limit)
                     .capture(false),
             )
     }

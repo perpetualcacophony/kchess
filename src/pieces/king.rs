@@ -11,6 +11,6 @@ impl PrimitivePiece for King {
     const CHECKMATE_POSSIBLE: bool = true;
 
     fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
-        set.add_piece(Queen).map(|ray| ray.limit(1))
+        set.add_piece(Queen).map(|ray| ray.some_limit(1))
     }
 }

@@ -20,13 +20,16 @@ impl RayBuilder {
         }
     }
 
-    pub fn limit(mut self, limit: usize) -> Self {
-        self.limit = Some(limit);
-        self
+    pub fn some_limit(self, limit: usize) -> Self {
+        self.limit(Some(limit))
     }
 
+    pub fn limit(mut self, limit: Option<usize>) -> Self {
+        self.limit = limit;
+        self
+    }
     pub fn once(self) -> Self {
-        self.limit(1)
+        self.some_limit(1)
     }
 
     pub fn capture(mut self, capture: bool) -> Self {
