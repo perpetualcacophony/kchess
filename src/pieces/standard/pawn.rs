@@ -1,6 +1,6 @@
 use crate::direction::{
-    ray::{RayBuilder, RaySetBuilder},
-    Cardinal, Diagonal,
+    ray::{self, set::Builder as RaySetBuilder},
+    Cardinal, Diagonal, Ray,
 };
 
 use super::PrimitivePiece;
@@ -14,12 +14,12 @@ impl PrimitivePiece for Pawn {
     const VALID_PROMOTION: bool = false;
 
     fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
-        set.add_many(Diagonal::ARRAY.map(|direction| RayBuilder::new(direction).once()))
-            .add_many(Cardinal::ARRAY.map(|direction| RayBuilder::new(direction).once()))
-            .add_many(Cardinal::ARRAY.map(|direction| RayBuilder::new(direction).some_limit(2)))
+        set.add_many(Diagonal::ARRAY.map(|direction| ray::Builder::new(direction).once()))
+            .add_many(Cardinal::ARRAY.map(|direction| ray::Builder::new(direction).once()))
+            .add_many(Cardinal::ARRAY.map(|direction| ray::Builder::new(direction).some_limit(2)))
     }
 
-    fn ray_enabled(piece: &crate::components::Piece<'_>, ray: &crate::direction::Ray) -> bool {
+    fn ray_enabled(piece: &crate::components::Piece<'_>, ray: &Ray) -> bool {
         if !ray.step().contains_cardinal(piece.side.forward_cardinal()) {
             return false;
         }

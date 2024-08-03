@@ -1,6 +1,6 @@
 use std::borrow::Borrow;
 
-use crate::direction::ray::{RaySet, RaySetBuilder};
+use crate::direction::ray;
 
 pub mod standard;
 pub use standard::{Bishop, King, Knight, Pawn, Queen, Rook};
@@ -33,7 +33,7 @@ pub struct PieceData {
     pub can_promote: bool,
     pub valid_promotion: bool,
     pub checkmate_possible: bool,
-    pub rays: RaySet,
+    pub rays: ray::Set,
 }
 
 impl PieceData {
@@ -43,7 +43,7 @@ impl PieceData {
             can_promote: P::CAN_PROMOTE,
             valid_promotion: P::VALID_PROMOTION,
             checkmate_possible: P::CHECKMATE_POSSIBLE,
-            rays: RaySet::from_builder(|builder| {
+            rays: ray::Set::from_builder(|builder| {
                 piece.borrow().add_rays(builder);
             }),
         }
@@ -56,7 +56,7 @@ pub trait PrimitivePiece: Sized {
     const VALID_PROMOTION: bool = true;
     const CHECKMATE_POSSIBLE: bool = false;
 
-    fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder;
+    fn add_rays<'rays>(&self, set: &'rays mut ray::set::Builder) -> &'rays mut ray::set::Builder;
 
     fn ray_enabled(_piece: &crate::components::Piece<'_>, _ray: &crate::direction::Ray) -> bool {
         true
@@ -92,7 +92,7 @@ where
 }
 
 impl<Set> Piece<Set> {
-    pub fn rays(&self) -> &RaySet {
+    pub fn rays(&self) -> &ray::Set {
         &self.data.rays
     }
 }

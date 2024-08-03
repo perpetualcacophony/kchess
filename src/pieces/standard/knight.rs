@@ -1,6 +1,6 @@
 use crate::{
     direction::{
-        ray::{RayBuilder, RaySetBuilder},
+        ray::{self, set::Builder as RaySetBuilder},
         Cardinal,
     },
     Direction,
@@ -93,7 +93,7 @@ impl PrimitivePiece for Knight {
 
     fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
         set.add_many(
-            KnightDirection::array().map(|direction| RayBuilder::new(direction).some_limit(1)),
+            KnightDirection::array().map(|direction| ray::Builder::new(direction).some_limit(1)),
         )
     }
 }

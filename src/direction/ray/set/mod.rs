@@ -1,7 +1,7 @@
 use super::{Cast, Ray};
 
 mod builder;
-pub use builder::RaySetBuilder;
+pub use builder::RaySetBuilder as Builder;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RaySet {
@@ -32,8 +32,8 @@ impl RaySet {
         Iter::new(self)
     }
 
-    pub fn from_builder(inner: impl FnOnce(&mut RaySetBuilder)) -> Self {
-        RaySetBuilder::new(inner).build()
+    pub fn from_builder(inner: impl FnOnce(&mut Builder)) -> Self {
+        Builder::new(inner).build()
     }
 
     pub fn cast<'a, 'b: 'a>(

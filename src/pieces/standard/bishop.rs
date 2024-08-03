@@ -1,5 +1,5 @@
 use crate::direction::{
-    ray::{RayBuilder, RaySetBuilder},
+    ray::{self, set::Builder as RaySetBuilder},
     Diagonal,
 };
 
@@ -12,6 +12,6 @@ impl PrimitivePiece for Bishop {
     const VALUE: usize = 3;
 
     fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
-        set.add_many(Diagonal::ARRAY.map(RayBuilder::new))
+        set.add_many(Diagonal::ARRAY.map(ray::Builder::new))
     }
 }

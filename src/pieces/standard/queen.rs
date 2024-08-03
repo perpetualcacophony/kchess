@@ -1,4 +1,4 @@
-use crate::direction::ray::RaySetBuilder;
+use crate::direction::ray::set::Builder as RaySetBuilder;
 
 use super::{Bishop, PrimitivePiece, Rook};
 

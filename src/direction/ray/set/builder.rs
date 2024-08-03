@@ -1,5 +1,5 @@
 use crate::{
-    direction::ray::{Ray, RayBuilder as Builder},
+    direction::ray::{Builder, Ray},
     pieces::PrimitivePiece,
 };
 

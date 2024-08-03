@@ -2,10 +2,10 @@ use super::Step;
 use crate::UncheckedSpace;
 
 mod builder;
-pub use builder::RayBuilder;
+pub use builder::RayBuilder as Builder;
 
 pub mod set;
-pub use set::{RaySet, RaySetBuilder};
+pub use set::RaySet as Set;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Ray {
@@ -19,7 +19,7 @@ impl Ray {
         self.capture
     }
 
-    pub const fn from_builder(builder: RayBuilder) -> Self {
+    pub const fn from_builder(builder: Builder) -> Self {
         Self {
             limit: builder.limit,
             step: builder.step,
@@ -43,8 +43,8 @@ impl Ray {
         Cast::new(self, start)
     }
 
-    pub fn into_builder(self) -> RayBuilder {
-        RayBuilder {
+    pub fn into_builder(self) -> Builder {
+        Builder {
             limit: self.limit,
             capture: self.capture,
             step: self.step,

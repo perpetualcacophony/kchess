@@ -1,5 +1,5 @@
 use crate::direction::{
-    ray::{RayBuilder, RaySetBuilder},
+    ray::{self, set::Builder as RaySetBuilder},
     Cardinal,
 };
 
@@ -12,6 +12,6 @@ impl PrimitivePiece for Rook {
     const VALUE: usize = 5;
 
     fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
-        set.add_many(Cardinal::ARRAY.map(RayBuilder::new))
+        set.add_many(Cardinal::ARRAY.map(ray::Builder::new))
     }
 }
