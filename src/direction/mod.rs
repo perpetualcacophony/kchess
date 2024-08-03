@@ -36,7 +36,7 @@ pub struct Step {
 }
 
 impl Step {
-    pub fn new(ranks: isize, files: isize) -> Self {
+    pub const fn new(ranks: isize, files: isize) -> Self {
         Self { ranks, files }
     }
 
@@ -46,6 +46,24 @@ impl Step {
 
     pub fn rotate_cw(self, turns: usize) -> Self {
         (0..turns).fold(self, |step, _| step.rotate_cw_once())
+    }
+
+    pub const fn as_ne(&self) -> ((bool, usize), (bool, usize)) {
+        (
+            (self.ranks.is_positive(), self.ranks.unsigned_abs()),
+            (self.files.is_positive(), self.files.unsigned_abs()),
+        )
+    }
+
+    pub const fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
+        let ((north, _), (east, _)) = self.as_ne();
+
+        match cardinal {
+            Cardinal::North => north,
+            Cardinal::East => east,
+            Cardinal::South => !north,
+            Cardinal::West => !east,
+        }
     }
 }
 

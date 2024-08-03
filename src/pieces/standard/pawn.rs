@@ -30,4 +30,8 @@ impl PrimitivePiece for Pawn {
                     .capture(false),
             )
     }
+
+    fn ray_enabled(piece: crate::components::Piece<'_>, ray: &crate::direction::Ray) -> bool {
+        ray.step().contains_cardinal(piece.side.forward_cardinal())
+    }
 }

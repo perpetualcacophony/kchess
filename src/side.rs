@@ -1,4 +1,4 @@
-use crate::direction::Cardinal;
+use crate::{direction::Cardinal, Direction};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Default, Hash)]
 pub struct ChessSide {
@@ -28,6 +28,10 @@ impl ChessSide {
 
     pub const fn two() -> [Self; 2] {
         [Self::new(0), Self::new(1)]
+    }
+
+    pub fn is_forward(&self, direction: &impl Direction) -> bool {
+        direction.contains_cardinal(self.forward_cardinal())
     }
 
     #[cfg(feature = "rand")]

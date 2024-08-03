@@ -33,6 +33,10 @@ impl Ray {
         Steps::new(self)
     }
 
+    pub const fn step(&self) -> Step {
+        self.step
+    }
+
     pub fn cast(&self, start: UncheckedSpace) -> Cast {
         Cast::new(self, start)
     }
