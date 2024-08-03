@@ -41,7 +41,7 @@ impl RaySet {
         piece: &'b crate::components::Piece<'b>,
     ) -> impl Iterator<Item = (&'a Ray, Cast<'a>)> + 'a {
         self.iter()
-            .filter(move |ray| (self.filter)(&piece, ray))
+            .filter(move |ray| (self.filter)(piece, ray))
             .map(move |ray| (ray, ray.cast(piece.space.as_unchecked())))
     }
 }

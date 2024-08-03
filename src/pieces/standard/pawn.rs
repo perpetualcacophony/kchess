@@ -1,9 +1,6 @@
-use crate::{
-    direction::{
-        ray::{RayBuilder, RaySetBuilder},
-        Cardinal, Diagonal,
-    },
-    pieces::PieceSet,
+use crate::direction::{
+    ray::{RayBuilder, RaySetBuilder},
+    Cardinal, Diagonal,
 };
 
 use super::PrimitivePiece;
@@ -27,12 +24,11 @@ impl PrimitivePiece for Pawn {
             return false;
         }
 
-        if ray.step().try_direction::<Cardinal>().is_some() {
-            if *piece.moved && ray.limit() == Some(2) {
-                return false;
-            } else if !piece.moved && ray.limit() == Some(1) {
-                return false;
-            }
+        if ray.step().try_direction::<Cardinal>().is_some()
+            && ((*piece.moved && ray.limit() == Some(2))
+                || (!piece.moved && ray.limit() == Some(1)))
+        {
+            return false;
         }
 
         true

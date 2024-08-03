@@ -1,4 +1,4 @@
-use crate::{game::AllPieces, pieces::PieceSet, Board, ChessSide, Space};
+use crate::{game::AllPieces, Board, ChessSide, Space};
 
 use crate::game;
 
