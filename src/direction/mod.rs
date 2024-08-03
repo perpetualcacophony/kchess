@@ -56,13 +56,11 @@ impl Step {
     }
 
     pub const fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
-        let ((north, _), (east, _)) = self.as_ne();
-
         match cardinal {
-            Cardinal::North => north,
-            Cardinal::East => east,
-            Cardinal::South => !north,
-            Cardinal::West => !east,
+            Cardinal::North => self.ranks.is_positive(),
+            Cardinal::East => self.files.is_positive(),
+            Cardinal::South => self.ranks.is_negative(),
+            Cardinal::West => self.ranks.is_negative(),
         }
     }
 }
