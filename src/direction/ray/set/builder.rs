@@ -5,9 +5,19 @@ use crate::{
 
 use super::RaySet;
 
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RaySetBuilder {
     builders: Vec<Builder>,
+    filter: fn(&crate::components::Piece, &Ray) -> bool,
+}
+
+impl Default for RaySetBuilder {
+    fn default() -> Self {
+        Self {
+            builders: Default::default(),
+            filter: |_, _| true,
+        }
+    }
 }
 
 impl RaySetBuilder {
@@ -30,6 +40,7 @@ impl RaySetBuilder {
     pub fn build(self) -> RaySet {
         RaySet {
             rays: self.builders.into_iter().map(Ray::from_builder).collect(),
+            filter: self.filter,
         }
     }
 
@@ -55,6 +66,11 @@ impl RaySetBuilder {
     }
 
     pub fn add_piece<P: PrimitivePiece>(&mut self, kind: impl std::borrow::Borrow<P>) -> &mut Self {
-        P::add_rays(kind.borrow(), self)
+        P::add_rays(kind.borrow(), self).add_filter::<P>()
+    }
+
+    pub fn add_filter<P: PrimitivePiece>(&mut self) -> &mut Self {
+        self.filter = P::ray_enabled;
+        self
     }
 }

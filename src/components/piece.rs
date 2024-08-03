@@ -6,12 +6,12 @@ bundle! {
     Piece:
     moved: bool,
     space: Space,
-    piece: crate::pieces::Piece<P>,
+    piece: crate::PieceData,
     side: ChessSide,
     captured: bool
 }
 
-impl<'c, P: PieceSet> Piece<'c, P> {
+impl<'c> Piece<'c> {
     pub fn dangerous_spaces(
         self,
         board: &'c Board,
@@ -33,11 +33,7 @@ impl<'c, P: PieceSet> Piece<'c, P> {
 
         let mut pieces = unfiltered.clone().filter(|piece| !piece.captured);
 
-        for (ray, cast) in self.piece.rays().cast(self.space.as_unchecked()) {
-            if !ray.enabled(&self.piece.inner) {
-                continue;
-            }
-
+        for (ray, cast) in self.piece.rays.cast(&self) {
             let mut cast = board.check_iter(cast);
 
             loop {
@@ -55,7 +51,7 @@ impl<'c, P: PieceSet> Piece<'c, P> {
             }
         }
 
-        if self.piece.data.checkmate_possible {
+        if self.piece.checkmate_possible {
             let dangerous_spaces = self.dangerous_spaces(board, unfiltered).collect::<Vec<_>>();
             moves.retain(|space| !dangerous_spaces.contains(space));
         }

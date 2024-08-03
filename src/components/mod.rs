@@ -16,9 +16,9 @@ pub mod side;
 pub use side::Side;
 
 #[derive(Clone, Debug, Default)]
-pub struct Components<P = Standard> {
+pub struct Components {
     space: Option<Space>,
-    piece: Option<crate::pieces::Piece<P>>,
+    piece: Option<PieceData>,
     side: Option<ChessSide>,
     captured: Option<bool>,
     moved: Option<bool>,

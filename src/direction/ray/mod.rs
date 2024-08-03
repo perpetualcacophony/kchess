@@ -1,5 +1,5 @@
 use super::Step;
-use crate::{pieces::PieceSet, UncheckedSpace};
+use crate::UncheckedSpace;
 
 mod builder;
 pub use builder::RayBuilder;
@@ -12,7 +12,6 @@ pub struct Ray {
     limit: Option<usize>,
     step: Step,
     capture: bool,
-    predicate: fn(&dyn PieceSet) -> bool,
 }
 
 impl Ray {
@@ -25,7 +24,6 @@ impl Ray {
             limit: builder.limit,
             step: builder.step,
             capture: builder.capture,
-            predicate: builder.predicate,
         }
     }
 
@@ -50,12 +48,7 @@ impl Ray {
             limit: self.limit,
             capture: self.capture,
             step: self.step,
-            predicate: self.predicate,
         }
-    }
-
-    pub fn enabled(&self, set: &impl PieceSet) -> bool {
-        (self.predicate)(set)
     }
 }
 

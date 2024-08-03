@@ -1,17 +1,26 @@
-use crate::UncheckedSpace;
-
 use super::{Cast, Ray};
 
 mod builder;
 pub use builder::RaySetBuilder;
 
-#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RaySet {
     #[cfg(not(feature = "smallvec"))]
     rays: Vec<Ray>,
 
     #[cfg(feature = "smallvec")]
     rays: smallvec::SmallVec<[Ray; 8]>,
+
+    filter: fn(&crate::components::Piece, &Ray) -> bool,
+}
+
+impl Default for RaySet {
+    fn default() -> Self {
+        Self {
+            rays: Default::default(),
+            filter: |_, _| true,
+        }
+    }
 }
 
 impl RaySet {
@@ -27,8 +36,13 @@ impl RaySet {
         RaySetBuilder::new(inner).build()
     }
 
-    pub fn cast(&self, start: UncheckedSpace) -> impl Iterator<Item = (&Ray, Cast<'_>)> + '_ {
-        self.iter().map(move |ray| (ray, ray.cast(start)))
+    pub fn cast<'a, 'b: 'a>(
+        &'a self,
+        piece: &'b crate::components::Piece<'b>,
+    ) -> impl Iterator<Item = (&'a Ray, Cast<'a>)> + 'a {
+        self.iter()
+            .filter(move |ray| (self.filter)(&piece, ray))
+            .map(move |ray| (ray, ray.cast(piece.space.as_unchecked())))
     }
 }
 

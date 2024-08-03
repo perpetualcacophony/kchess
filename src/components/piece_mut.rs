@@ -1,5 +1,5 @@
 use crate::{
-    pieces::{Piece, PieceData, PieceSet, Queen},
+    pieces::{Piece, PieceData, PieceSet, PrimitivePiece, Queen},
     Board, ChessSide, Space,
 };
 
@@ -7,18 +7,18 @@ bundle! {
     mut PieceMut:
     moved: bool,
     space: Space,
-    piece: crate::pieces::Piece<P>,
+    piece: PieceData,
     side: ChessSide,
     captured: bool
 }
 
-impl<'c, P: PieceSet + Copy> PieceMut<'c, P> {
+impl<'c> PieceMut<'c> {
     pub fn capture(&mut self) {
         *self.captured = true;
     }
 
-    pub fn promote(&mut self, into: P) {
-        *self.piece = Piece::new(into);
+    pub fn promote(&mut self) {
+        *self.piece = PieceData::from_primitive(Queen);
     }
 
     pub fn move_to(
@@ -35,8 +35,8 @@ impl<'c, P: PieceSet + Copy> PieceMut<'c, P> {
 
         *self.space = space;
 
-        if self.piece.data.can_promote && board.opposite_end(*self.side, *self.space) {
-            self.promote(P::promotions().last().copied().unwrap());
+        if self.piece.can_promote && board.opposite_end(*self.side, *self.space) {
+            self.promote();
         }
     }
 }

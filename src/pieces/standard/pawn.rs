@@ -3,7 +3,7 @@ use crate::{
         ray::{RayBuilder, RaySetBuilder},
         Cardinal, Diagonal,
     },
-    ChessSide, Direction,
+    pieces::PieceSet,
 };
 
 use super::PrimitivePiece;
@@ -22,7 +22,7 @@ impl PrimitivePiece for Pawn {
             .add_many(Cardinal::ARRAY.map(|direction| RayBuilder::new(direction).some_limit(2)))
     }
 
-    fn ray_enabled(piece: crate::components::Piece<'_>, ray: &crate::direction::Ray) -> bool {
+    fn ray_enabled(piece: &crate::components::Piece<'_>, ray: &crate::direction::Ray) -> bool {
         if !ray.step().contains_cardinal(piece.side.forward_cardinal()) {
             return false;
         }
