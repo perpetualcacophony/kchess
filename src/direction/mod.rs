@@ -10,20 +10,13 @@ pub use diagonal::Diagonal;
 pub mod ray;
 pub use ray::Ray;
 
-use crate::{ChessSide, UncheckedSpace};
+use crate::UncheckedSpace;
 
 pub trait Direction {
     fn as_step(&self) -> Step;
 
     fn next_space(&self, start: UncheckedSpace) -> Option<UncheckedSpace> {
         self.as_step().next_space(start)
-    }
-
-    fn relative(self, side: ChessSide) -> Relative<Self>
-    where
-        Self: Sized,
-    {
-        Relative::new(self, side)
     }
 
     fn contains_cardinal(&self, cardinal: Cardinal) -> bool;
@@ -116,35 +109,5 @@ impl Mul<isize> for Step {
 
     fn mul(self, rhs: isize) -> Self::Output {
         Self::new(self.ranks * rhs, self.files * rhs)
-    }
-}
-
-pub struct Relative<D> {
-    direction: D,
-    side: ChessSide,
-}
-
-impl<D> Relative<D> {
-    pub fn new(direction: D, side: ChessSide) -> Self {
-        Self { direction, side }
-    }
-}
-
-impl<D: Direction> Direction for Relative<D> {
-    fn as_step(&self) -> Step {
-        self.direction
-            .as_step()
-            .rotate_cw(Cardinal::NORTH.turns_cw(self.side.forward_cardinal()))
-    }
-
-    fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
-        self.direction.contains_cardinal(cardinal)
-    }
-
-    fn parse_step(step: Step) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        unimplemented!()
     }
 }
