@@ -1,5 +1,6 @@
 use super::{Cardinal, Direction, Step};
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Diagonal {
     north: bool,
     east: bool,
@@ -67,5 +68,50 @@ impl std::ops::Not for Diagonal {
 
     fn not(self) -> Self::Output {
         Self::new(!self.north, !self.east)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[macro_use]
+    mod macros;
+
+    use super::Diagonal;
+
+    contains_cardinal! {
+        NORTHEAST {
+            NORTH true
+            EAST true
+            SOUTH false
+            WEST false
+        }
+
+        NORTHWEST {
+            NORTH true
+            EAST false
+            SOUTH false
+            WEST true
+        }
+
+        SOUTHWEST {
+            NORTH false
+            EAST false
+            SOUTH true
+            WEST true
+        }
+
+        SOUTHEAST {
+            NORTH false
+            EAST true
+            SOUTH true
+            WEST false
+        }
+    }
+
+    opposite! {
+        NORTHEAST SOUTHWEST
+        NORTHWEST SOUTHEAST
+        SOUTHWEST NORTHEAST
+        SOUTHEAST NORTHWEST
     }
 }
