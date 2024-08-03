@@ -9,10 +9,7 @@ use crate::{
 use super::PrimitivePiece;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct Pawn {
-    moved: bool,
-    side: ChessSide,
-}
+pub struct Pawn;
 
 impl PrimitivePiece for Pawn {
     const VALUE: usize = 1;
@@ -20,18 +17,24 @@ impl PrimitivePiece for Pawn {
     const VALID_PROMOTION: bool = false;
 
     fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
-        let limit = if self.moved { 1 } else { 2 };
-
-        set.add(RayBuilder::new(Diagonal::NORTHEAST.relative(self.side)).once())
-            .add(RayBuilder::new(Diagonal::NORTHEAST.relative(self.side)).once())
-            .add(
-                RayBuilder::new(Cardinal::NORTH.relative(self.side))
-                    .some_limit(limit)
-                    .capture(false),
-            )
+        set.add_many(Diagonal::ARRAY.map(|direction| RayBuilder::new(direction).once()))
+            .add_many(Cardinal::ARRAY.map(|direction| RayBuilder::new(direction).once()))
+            .add_many(Cardinal::ARRAY.map(|direction| RayBuilder::new(direction).some_limit(2)))
     }
 
     fn ray_enabled(piece: crate::components::Piece<'_>, ray: &crate::direction::Ray) -> bool {
-        ray.step().contains_cardinal(piece.side.forward_cardinal())
+        if !ray.step().contains_cardinal(piece.side.forward_cardinal()) {
+            return false;
+        }
+
+        if ray.step().try_direction::<Cardinal>().is_some() {
+            if *piece.moved && ray.limit() == Some(2) {
+                return false;
+            } else if !piece.moved && ray.limit() == Some(1) {
+                return false;
+            }
+        }
+
+        true
     }
 }

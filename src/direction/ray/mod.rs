@@ -37,6 +37,10 @@ impl Ray {
         self.step
     }
 
+    pub const fn limit(&self) -> Option<usize> {
+        self.limit
+    }
+
     pub fn cast(&self, start: UncheckedSpace) -> Cast {
         Cast::new(self, start)
     }

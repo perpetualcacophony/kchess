@@ -88,6 +88,10 @@ impl Step {
                 .then_some(self.ranks.unsigned_abs()),
         }
     }
+
+    pub fn try_direction<D: Direction>(&self) -> Option<D> {
+        D::parse_step(*self)
+    }
 }
 
 impl Step {
