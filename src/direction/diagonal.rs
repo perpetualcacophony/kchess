@@ -1,4 +1,4 @@
-use super::{Direction, Step};
+use super::{Cardinal, Direction, Step};
 
 pub struct Diagonal {
     north: bool,
@@ -22,6 +22,15 @@ impl Diagonal {
 impl Diagonal {
     pub const fn new(north: bool, east: bool) -> Self {
         Self { north, east }
+    }
+
+    pub const fn contains(&self, cardinal: Cardinal) -> bool {
+        match cardinal {
+            Cardinal::North => self.north,
+            Cardinal::East => self.east,
+            Cardinal::South => !self.north,
+            Cardinal::West => !self.east,
+        }
     }
 }
 
