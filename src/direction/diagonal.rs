@@ -45,6 +45,21 @@ impl Direction for Diagonal {
     fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
         self.contains(cardinal)
     }
+
+    fn parse_step(step: Step) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if step.ranks == 0 || step.files == 0 {
+            None
+        } else {
+            Some({
+                let north = step.ranks.checked_abs() == Some(1);
+                let east = step.files.checked_abs() == Some(1);
+                Self::new(north, east)
+            })
+        }
+    }
 }
 
 impl std::ops::Not for Diagonal {

@@ -27,12 +27,16 @@ pub trait Direction {
     }
 
     fn contains_cardinal(&self, cardinal: Cardinal) -> bool;
+
+    fn parse_step(step: Step) -> Option<Self>
+    where
+        Self: Sized;
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Step {
-    ranks: isize,
-    files: isize,
+    pub ranks: isize,
+    pub files: isize,
 }
 
 impl Step {
@@ -61,6 +65,27 @@ impl Step {
             Cardinal::East => self.files.is_positive(),
             Cardinal::South => self.ranks.is_negative(),
             Cardinal::West => self.ranks.is_negative(),
+        }
+    }
+
+    pub fn count_cardinal(&self, cardinal: Cardinal) -> Option<usize> {
+        match cardinal {
+            Cardinal::North => self
+                .ranks
+                .is_positive()
+                .then_some(self.ranks.unsigned_abs()),
+            Cardinal::East => self
+                .files
+                .is_positive()
+                .then_some(self.files.unsigned_abs()),
+            Cardinal::South => self
+                .ranks
+                .is_negative()
+                .then_some(self.ranks.unsigned_abs()),
+            Cardinal::West => self
+                .files
+                .is_negative()
+                .then_some(self.ranks.unsigned_abs()),
         }
     }
 }
@@ -110,5 +135,12 @@ impl<D: Direction> Direction for Relative<D> {
 
     fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
         self.direction.contains_cardinal(cardinal)
+    }
+
+    fn parse_step(step: Step) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        unimplemented!()
     }
 }

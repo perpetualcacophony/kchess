@@ -115,6 +115,27 @@ impl Direction for Cardinal {
     fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
         self == &cardinal
     }
+
+    fn parse_step(step: Step) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if step.ranks.checked_abs() == Some(1) && step.files == 0 {
+            Some(if step.ranks == 1 {
+                Self::NORTH
+            } else {
+                Self::SOUTH
+            })
+        } else if step.files.checked_abs() == Some(1) && step.ranks == 0 {
+            Some(if step.files == 1 {
+                Self::EAST
+            } else {
+                Self::WEST
+            })
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(test)]

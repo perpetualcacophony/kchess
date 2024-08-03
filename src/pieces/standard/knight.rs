@@ -46,6 +46,43 @@ impl Direction for KnightDirection {
     fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
         self.long == cardinal || self.short == cardinal
     }
+
+    fn parse_step(step: crate::direction::Step) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if step.ranks.checked_abs() == Some(2) || step.files.checked_abs() == Some(1) {
+            let long = if step.ranks.is_positive() {
+                Cardinal::NORTH
+            } else {
+                Cardinal::SOUTH
+            };
+
+            let short = if step.files.is_positive() {
+                Cardinal::EAST
+            } else {
+                Cardinal::WEST
+            };
+
+            Some(Self::new(long, short))
+        } else if step.files.checked_abs() == Some(2) || step.ranks.checked_abs() == Some(1) {
+            let long = if step.files.is_positive() {
+                Cardinal::NORTH
+            } else {
+                Cardinal::SOUTH
+            };
+
+            let short = if step.ranks.is_positive() {
+                Cardinal::EAST
+            } else {
+                Cardinal::WEST
+            };
+
+            Some(Self::new(long, short))
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Default, Copy, Clone, Debug, PartialEq, Eq, Hash)]
