@@ -57,6 +57,10 @@ pub trait PrimitivePiece: Sized {
     const CHECKMATE_POSSIBLE: bool = false;
 
     fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder;
+
+    fn ray_enabled(piece: crate::components::Piece<'_>, ray: &crate::direction::Ray) -> bool {
+        true
+    }
 }
 
 pub trait PieceSet {

@@ -42,6 +42,10 @@ impl Direction for KnightDirection {
     fn as_step(&self) -> crate::direction::Step {
         self.long.as_step() * 2 + self.short.as_step()
     }
+
+    fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
+        self.long == cardinal || self.short == cardinal
+    }
 }
 
 #[derive(Default, Copy, Clone, Debug, PartialEq, Eq, Hash)]

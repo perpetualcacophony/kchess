@@ -8,6 +8,7 @@ mod diagonal;
 pub use diagonal::Diagonal;
 
 pub mod ray;
+pub use ray::Ray;
 
 use crate::{ChessSide, UncheckedSpace};
 
@@ -24,6 +25,8 @@ pub trait Direction {
     {
         Relative::new(self, side)
     }
+
+    fn contains_cardinal(&self, cardinal: Cardinal) -> bool;
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
@@ -87,5 +90,9 @@ impl<D: Direction> Direction for Relative<D> {
         self.direction
             .as_step()
             .rotate_cw(Cardinal::NORTH.turns_cw(self.side.forward_cardinal()))
+    }
+
+    fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
+        self.direction.contains_cardinal(cardinal)
     }
 }

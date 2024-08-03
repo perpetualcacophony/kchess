@@ -111,6 +111,10 @@ impl Direction for Cardinal {
 
         Step::new(ranks, files)
     }
+
+    fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
+        self == &cardinal
+    }
 }
 
 #[cfg(test)]

@@ -41,6 +41,10 @@ impl Direction for Diagonal {
             if self.east { 1 } else { -1 },
         )
     }
+
+    fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
+        self.contains(cardinal)
+    }
 }
 
 impl std::ops::Not for Diagonal {
