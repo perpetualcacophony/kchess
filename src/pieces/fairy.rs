@@ -9,3 +9,6 @@ pub use nightrider::Nightrider;
 
 mod knook;
 pub use knook::Knook;
+
+mod amazon;
+pub use amazon::Amazon;
