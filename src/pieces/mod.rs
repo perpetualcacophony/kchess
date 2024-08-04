@@ -62,37 +62,15 @@ pub trait PrimitivePiece: Sized {
 }
 
 pub trait PieceSet {
+    type Item;
+
+    fn pieces() -> impl IntoIterator<Item = Self::Item>;
+
     fn data(&self) -> PieceData;
 
     fn promotions() -> Vec<Self>
     where
         Self: Sized;
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Piece<Set> {
-    pub inner: Set,
-    pub data: PieceData,
-}
-
-impl<Set> Piece<Set>
-where
-    Set: PieceSet,
-{
-    pub fn new(inner: impl Into<Set>) -> Self {
-        let inner = inner.into();
-
-        Self {
-            data: inner.data(),
-            inner,
-        }
-    }
-}
-
-impl<Set> Piece<Set> {
-    pub fn rays(&self) -> &ray::Set {
-        &self.data.rays
-    }
 }
 
 macro_rules! piece_set {
@@ -134,9 +112,9 @@ piece_set! {
     King
 }
 
-pub type StandardPiece = Piece<Standard>;
-
 impl PieceSet for Standard {
+    type Item = StandardItem;
+
     fn data(&self) -> PieceData {
         self.piece_data()
     }
@@ -152,4 +130,24 @@ impl PieceSet for Standard {
             Self::Queen(Queen),
         ]
     }
+
+    fn pieces() -> impl IntoIterator<Item = Self::Item> {
+        [
+            StandardItem::Pawn(Pawn),
+            StandardItem::Knight(Knight),
+            StandardItem::Bishop(Bishop),
+            StandardItem::Rook(Rook),
+            StandardItem::Queen(Queen),
+            StandardItem::King(King),
+        ]
+    }
+}
+
+pub enum StandardItem {
+    Pawn(Pawn),
+    Knight(Knight),
+    Bishop(Bishop),
+    Rook(Rook),
+    Queen(Queen),
+    King(King),
 }
