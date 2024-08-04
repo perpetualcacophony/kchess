@@ -43,9 +43,7 @@ impl PieceData {
             can_promote: P::CAN_PROMOTE,
             valid_promotion: P::VALID_PROMOTION,
             checkmate_possible: P::CHECKMATE_POSSIBLE,
-            rays: ray::Set::from_builder(|builder| {
-                piece.borrow().add_rays(builder);
-            }),
+            rays: ray::Set::new(|builder| piece.borrow().add_rays(builder)),
         }
     }
 }

@@ -24,15 +24,11 @@ impl Default for RaySet {
 }
 
 impl RaySet {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     pub fn iter(&self) -> Iter {
         Iter::new(self)
     }
 
-    pub fn from_builder(inner: impl FnOnce(&mut Builder)) -> Self {
+    pub fn new(inner: impl FnOnce(&mut Builder) -> &mut Builder) -> Self {
         Builder::new(inner).build()
     }
 

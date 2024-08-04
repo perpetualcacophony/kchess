@@ -21,7 +21,7 @@ impl Default for RaySetBuilder {
 }
 
 impl RaySetBuilder {
-    pub fn new(inner: impl FnOnce(&mut Self)) -> Self {
+    pub fn new(inner: impl FnOnce(&mut Self) -> &mut Self) -> Self {
         let mut new = Self::default();
         inner(&mut new);
         new
