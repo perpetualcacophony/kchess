@@ -17,8 +17,29 @@ impl Cardinal {
     pub const ARRAY: [Self; 4] = [Self::NORTH, Self::EAST, Self::SOUTH, Self::WEST];
     pub const SLICE: &[Self] = &[Self::NORTH, Self::EAST, Self::SOUTH, Self::WEST];
 
+    pub fn rotate_ccw(self, turns: usize) -> Self {
+        if turns == 0 {
+            self
+        } else if turns == 2 {
+            self.opposite()
+        } else {
+            let mut rotated = self;
+
+            for _ in 0..turns {
+                rotated = match rotated {
+                    Self::NORTH => Self::WEST,
+                    Self::EAST => Self::NORTH,
+                    Self::SOUTH => Self::EAST,
+                    Self::WEST => Self::SOUTH,
+                }
+            }
+
+            rotated
+        }
+    }
+
     pub fn rotate_cw(self, turns: usize) -> Self {
-        if turns == 1 {
+        if turns == 0 {
             self
         } else if turns == 2 {
             self.opposite()
@@ -36,6 +57,16 @@ impl Cardinal {
 
             rotated
         }
+    }
+
+    pub fn rotate(self, clockwise: bool, turns: usize) -> Self {
+        let rotate = if clockwise {
+            Self::rotate_cw
+        } else {
+            Self::rotate_ccw
+        };
+
+        rotate(self, turns)
     }
 
     pub fn turns_cw(self, rhs: Self) -> usize {

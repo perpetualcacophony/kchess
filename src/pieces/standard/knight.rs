@@ -10,23 +10,17 @@ use super::PrimitivePiece;
 
 #[derive(Clone, Copy, Debug)]
 pub struct KnightDirection {
-    long: Cardinal,
-    short: Cardinal,
+    cardinal: Cardinal,
+    right: bool,
 }
 
 impl KnightDirection {
-    pub fn try_new(long: Cardinal, short: Cardinal) -> Option<Self> {
-        long.perpendicular_to(short)
-            .then_some(Self::new(long, short))
+    pub const fn new(cardinal: Cardinal, right: bool) -> Self {
+        Self { cardinal, right }
     }
 
-    pub fn new(long: Cardinal, short: Cardinal) -> Self {
-        assert!(long.perpendicular_to(short));
-        Self { long, short }
-    }
-
-    pub fn from_long(long: Cardinal) -> [Self; 2] {
-        long.perpendicular().map(|short| Self::new(long, short))
+    pub const fn from_long(long: Cardinal) -> [Self; 2] {
+        [Self::new(long, true), Self::new(long, false)]
     }
 
     pub fn array() -> [Self; 8] {
@@ -36,15 +30,19 @@ impl KnightDirection {
             .try_into()
             .unwrap()
     }
+
+    fn short_cardinal(&self) -> Cardinal {
+        self.cardinal.rotate(self.right, 1)
+    }
 }
 
 impl Direction for KnightDirection {
     fn as_step(&self) -> crate::direction::Step {
-        self.long.as_step() * 2 + self.short.as_step()
+        self.cardinal.as_step() * 2 + self.short_cardinal().as_step()
     }
 
     fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
-        self.long == cardinal || self.short == cardinal
+        self.cardinal == cardinal || self.short_cardinal() == cardinal
     }
 
     fn parse_step(step: crate::direction::Step) -> Option<Self>
@@ -52,40 +50,32 @@ impl Direction for KnightDirection {
         Self: Sized,
     {
         if step.ranks.checked_abs() == Some(2) || step.files.checked_abs() == Some(1) {
-            let long = if step.ranks.is_positive() {
+            let cardinal = if step.ranks.is_positive() {
                 Cardinal::NORTH
             } else {
                 Cardinal::SOUTH
             };
 
-            let short = if step.files.is_positive() {
-                Cardinal::EAST
-            } else {
-                Cardinal::WEST
-            };
+            let right = !step.files.is_positive();
 
-            Some(Self::new(long, short))
+            Some(Self::new(cardinal, right))
         } else if step.files.checked_abs() == Some(2) || step.ranks.checked_abs() == Some(1) {
-            let long = if step.files.is_positive() {
-                Cardinal::NORTH
-            } else {
-                Cardinal::SOUTH
-            };
-
-            let short = if step.ranks.is_positive() {
+            let cardinal = if step.files.is_positive() {
                 Cardinal::EAST
             } else {
                 Cardinal::WEST
             };
 
-            Some(Self::new(long, short))
+            let right = !step.ranks.is_positive();
+
+            Some(Self::new(cardinal, right))
         } else {
             None
         }
     }
 
     fn as_cardinals(&self) -> impl IntoIterator<Item = Cardinal> {
-        [self.long, self.long, self.short]
+        [self.cardinal, self.cardinal, self.short_cardinal()]
     }
 }
 
