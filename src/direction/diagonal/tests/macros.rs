@@ -33,21 +33,3 @@ macro_rules! opposite {
         }
     }};
 }
-
-macro_rules! parse_step {
-    ($( $ranks:literal, $files:literal $diagonal:ident )*) => {paste::paste!{
-        mod parse_step {
-            use crate::{Direction, direction::Step};
-
-            $(
-                #[test]
-                fn [<step_ $ranks _ $files _ $diagonal:lower>]() {
-                    assert_eq!(
-                        super::Diagonal::parse_step(Step::new($ranks, $files)),
-                        Some(super::Diagonal::$diagonal)
-                    )
-                }
-            )*
-        }
-    }};
-}

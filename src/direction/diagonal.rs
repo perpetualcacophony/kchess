@@ -51,12 +51,12 @@ impl Direction for Diagonal {
     where
         Self: Sized,
     {
-        if step.ranks == 0 || step.files == 0 {
+        if step.ranks.checked_abs() != Some(1) || step.files.checked_abs() != Some(1) {
             None
         } else {
             Some({
-                let north = step.ranks.checked_abs() == Some(1);
-                let east = step.files.checked_abs() == Some(1);
+                let north = step.ranks.is_positive();
+                let east = step.files.is_positive();
                 Self::new(north, east)
             })
         }
@@ -75,6 +75,8 @@ impl std::ops::Not for Diagonal {
 mod tests {
     #[macro_use]
     mod macros;
+
+    use crate::Direction;
 
     use super::Diagonal;
 
@@ -113,5 +115,62 @@ mod tests {
         NORTHWEST SOUTHEAST
         SOUTHWEST NORTHEAST
         SOUTHEAST NORTHWEST
+    }
+
+    mod parse_step {
+        use super::Diagonal;
+        use crate::{direction::Step, Direction};
+
+        #[test]
+        fn parse_1_1() {
+            assert_eq!(
+                Diagonal::parse_step(Step::new(1, 1)),
+                Some(Diagonal::NORTHEAST)
+            )
+        }
+
+        #[test]
+        fn parse_1_neg1() {
+            assert_eq!(
+                Diagonal::parse_step(Step::new(1, -1)),
+                Some(Diagonal::NORTHWEST)
+            )
+        }
+
+        #[test]
+        fn parse_neg1_1() {
+            assert_eq!(
+                Diagonal::parse_step(Step::new(-1, 1)),
+                Some(Diagonal::SOUTHEAST)
+            )
+        }
+
+        #[test]
+        fn parse_neg1_neg1() {
+            assert_eq!(
+                Diagonal::parse_step(Step::new(-1, -1)),
+                Some(Diagonal::SOUTHWEST)
+            )
+        }
+
+        #[test]
+        #[should_panic]
+        fn parse_0_0() {
+            assert!(Diagonal::parse_step(Step::new(0, 0)).is_some())
+        }
+
+        #[test]
+        #[should_panic]
+        fn parse_2_3() {
+            assert!(Diagonal::parse_step(Step::new(2, 3)).is_some())
+        }
+    }
+
+    #[test]
+    fn to_step_then_parse() {
+        assert_eq!(
+            Diagonal::NORTHEAST.as_step().try_direction::<Diagonal>(),
+            Some(Diagonal::NORTHEAST)
+        )
     }
 }
