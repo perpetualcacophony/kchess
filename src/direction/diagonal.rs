@@ -61,6 +61,22 @@ impl Direction for Diagonal {
             })
         }
     }
+
+    fn as_cardinals(&self) -> impl IntoIterator<Item = Cardinal> {
+        let north_south = if self.north {
+            Cardinal::NORTH
+        } else {
+            Cardinal::SOUTH
+        };
+
+        let east_west = if self.east {
+            Cardinal::EAST
+        } else {
+            Cardinal::WEST
+        };
+
+        [north_south, east_west]
+    }
 }
 
 impl std::ops::Not for Diagonal {

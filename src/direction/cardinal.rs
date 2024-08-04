@@ -136,6 +136,10 @@ impl Direction for Cardinal {
             None
         }
     }
+
+    fn as_cardinals(&self) -> impl IntoIterator<Item = Cardinal> {
+        [*self]
+    }
 }
 
 #[cfg(test)]

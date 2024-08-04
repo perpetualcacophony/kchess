@@ -83,6 +83,10 @@ impl Direction for KnightDirection {
             None
         }
     }
+
+    fn as_cardinals(&self) -> impl IntoIterator<Item = Cardinal> {
+        [self.long, self.long, self.short]
+    }
 }
 
 #[derive(Default, Copy, Clone, Debug, PartialEq, Eq, Hash)]

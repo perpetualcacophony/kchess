@@ -18,7 +18,11 @@ pub trait Direction {
         self.as_step().next_space(start)
     }
 
-    fn contains_cardinal(&self, cardinal: Cardinal) -> bool;
+    fn as_cardinals(&self) -> impl IntoIterator<Item = Cardinal>;
+
+    fn contains_cardinal(&self, cardinal: Cardinal) -> bool {
+        self.as_cardinals().into_iter().any(|item| item == cardinal)
+    }
 
     fn parse_step(step: step::Step) -> Option<Self>
     where
