@@ -61,14 +61,17 @@ impl Step {
     pub fn try_direction<D: Direction>(&self) -> Option<D> {
         D::parse_step(*self)
     }
-}
 
-impl Step {
     pub fn next_space(&self, start: UncheckedSpace) -> Option<UncheckedSpace> {
         Some(UncheckedSpace::new(
             start.rank.checked_add_signed(self.ranks)?,
             start.file.checked_add_signed(self.files)?,
         ))
+    }
+
+    pub fn length(&self) -> f64 {
+        let sum = (self.ranks.pow(2) + self.ranks.pow(2)) as f64;
+        sum.sqrt()
     }
 }
 
@@ -85,5 +88,19 @@ impl Mul<isize> for Step {
 
     fn mul(self, rhs: isize) -> Self::Output {
         Self::new(self.ranks * rhs, self.files * rhs)
+    }
+}
+
+impl Neg for Step {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self::new(!self.ranks, !self.files)
+    }
+}
+
+impl<'a, T: Direction> From<&'a T> for Step {
+    fn from(value: &'a T) -> Self {
+        value.as_step()
     }
 }
