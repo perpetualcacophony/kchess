@@ -1,4 +1,4 @@
-use super::Step;
+use super::step::Step;
 use crate::UncheckedSpace;
 
 mod builder;

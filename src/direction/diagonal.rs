@@ -1,4 +1,4 @@
-use super::{Cardinal, Direction, Step};
+use super::{step::Step, Cardinal, Direction};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Diagonal {

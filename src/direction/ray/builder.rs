@@ -1,11 +1,11 @@
 use crate::Direction;
 
-use super::Step;
+use super::modname::Step;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct RayBuilder {
     pub(super) limit: Option<usize>,
-    pub(super) step: Step,
+    pub(super) step: modname::Step,
     pub(super) capture: bool,
 }
 

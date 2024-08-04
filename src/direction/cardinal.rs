@@ -1,4 +1,4 @@
-use super::{Direction, Step};
+use super::{step::Step, Direction};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Cardinal {
