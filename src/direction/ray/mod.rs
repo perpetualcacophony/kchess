@@ -50,6 +50,12 @@ impl Ray {
             step: self.step,
         }
     }
+
+    pub fn in_path(&self, start: UncheckedSpace, target: UncheckedSpace) -> bool {
+        start.distance_step(target).is_some_and(|step| {
+            step.ranks % self.step.ranks == 0 && step.files % self.step.files == 0
+        })
+    }
 }
 
 struct Steps<'ray> {

@@ -1,4 +1,4 @@
-use crate::direction::Direction;
+use crate::direction::{Direction, Step};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Space {
@@ -47,5 +47,11 @@ impl UncheckedSpace {
 
     pub fn step(self, direction: impl Direction) -> Self {
         direction.next_space(self).unwrap()
+    }
+
+    pub fn distance_step(self, rhs: Self) -> Option<Step> {
+        let ranks = isize::try_from(rhs.rank).ok()? - isize::try_from(self.rank).ok()?;
+        let files = isize::try_from(rhs.file).ok()? - isize::try_from(self.file).ok()?;
+        Some(Step::new(ranks, files))
     }
 }
