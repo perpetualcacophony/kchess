@@ -3,6 +3,9 @@ use crate::{components, Board, ChessSide, Components, EntityId, Space};
 pub mod pieces;
 pub use pieces::AllPieces;
 
+mod context;
+pub use context::GameContext as Context;
+
 pub struct Game {
     board: Board,
     pub map: std::collections::HashMap<EntityId, Components>,
@@ -38,5 +41,9 @@ impl Game {
             side,
             pieces: self.pieces().filter(|piece| piece.side == &side).collect(),
         })
+    }
+
+    pub fn context(&self) -> Context<'_> {
+        Context::from_game(self)
     }
 }
