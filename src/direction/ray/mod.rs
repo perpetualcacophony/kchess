@@ -1,5 +1,5 @@
 use super::step::Step;
-use crate::UncheckedSpace;
+use crate::Space;
 
 mod builder;
 pub use builder::RayBuilder as Builder;
@@ -39,7 +39,7 @@ impl Ray {
         self.limit
     }
 
-    pub fn cast(&self, start: UncheckedSpace) -> Cast {
+    pub fn cast(&self, start: &Space) -> Cast {
         Cast::new(self, start)
     }
 
@@ -51,7 +51,7 @@ impl Ray {
         }
     }
 
-    pub fn in_path(&self, start: UncheckedSpace, target: UncheckedSpace) -> bool {
+    pub fn in_path(&self, start: &Space, target: &Space) -> bool {
         start.distance_step(target).is_some_and(|step| {
             step.ranks % self.step.ranks == 0 && step.files % self.step.files == 0
         })
@@ -88,21 +88,18 @@ impl<'ray> Iterator for Steps<'ray> {
     }
 }
 
-type CastInner<'ray> = std::iter::Scan<
-    Steps<'ray>,
-    UncheckedSpace,
-    fn(&mut UncheckedSpace, <Steps as Iterator>::Item) -> Option<UncheckedSpace>,
->;
+type CastInner<'ray> =
+    std::iter::Scan<Steps<'ray>, Space, fn(&mut Space, <Steps as Iterator>::Item) -> Option<Space>>;
 
 pub struct Cast<'ray> {
     inner: CastInner<'ray>,
 }
 
 impl<'ray> Cast<'ray> {
-    fn new(ray: &'ray Ray, start: UncheckedSpace) -> Self {
+    fn new(ray: &'ray Ray, start: &Space) -> Self {
         Self {
-            inner: ray.steps().scan(start, |start, step| {
-                if let Some(next) = step.next_space(*start) {
+            inner: ray.steps().scan(*start, |start, step| {
+                if let Some(next) = step.next_space(start) {
                     *start = next;
 
                     Some(next)
@@ -115,7 +112,7 @@ impl<'ray> Cast<'ray> {
 }
 
 impl<'ray> Iterator for Cast<'ray> {
-    type Item = UncheckedSpace;
+    type Item = Space;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next()

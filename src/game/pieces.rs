@@ -1,30 +1,36 @@
-use crate::{components::Piece, Components, EntityId};
+use crate::EntityId;
 
-use super::Game;
+use super::{components::Piece, Game};
 
-#[derive(Clone)]
-pub struct AllPieces<'c> {
-    inner: std::collections::hash_map::Values<'c, EntityId, Components>,
+#[derive(Clone, Copy, Debug)]
+pub struct AllPieces<I> {
+    inner: I,
 }
 
-impl<'c> AllPieces<'c> {
-    pub(super) fn get(game: &'c Game) -> Self {
+impl<I> AllPieces<I> {
+    pub(super) fn new(iter: impl IntoIterator<IntoIter = I>) -> Self {
         Self {
-            inner: game.map.values(),
+            inner: iter.into_iter(),
         }
     }
 }
 
-impl<'c> Iterator for AllPieces<'c> {
-    type Item = Piece<'c>;
+impl<'a, I> Iterator for AllPieces<I>
+where
+    I: Iterator<Item = &'a Piece>,
+{
+    type Item = &'a Piece;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next().and_then(Piece::get)
+        self.inner.next()
     }
 }
 
-impl<'c> AllPieces<'c> {
-    pub fn not_captured(self) -> impl Iterator<Item = Piece<'c>> {
+impl<'a, I> AllPieces<I>
+where
+    Self: Iterator<Item = &'a Piece>,
+{
+    pub fn not_captured(self) -> impl Iterator<Item = &'a Piece> {
         self.filter(|piece| !piece.captured)
     }
 }

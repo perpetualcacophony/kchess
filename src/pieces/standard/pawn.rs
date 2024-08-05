@@ -1,6 +1,9 @@
-use crate::direction::{
-    ray::{self, set::Builder as RaySetBuilder},
-    Cardinal, Diagonal, Ray,
+use crate::{
+    direction::{
+        ray::{self, set::Builder as RaySetBuilder},
+        Cardinal, Diagonal, Ray,
+    },
+    game::components::Piece,
 };
 
 use super::PrimitivePiece;
@@ -19,14 +22,13 @@ impl PrimitivePiece for Pawn {
             .add_many(Cardinal::ARRAY.map(|direction| ray::Builder::new(direction).some_limit(2)))
     }
 
-    fn ray_enabled(piece: &crate::components::Piece<'_>, ray: &Ray) -> bool {
+    fn ray_enabled(piece: &Piece, ray: &Ray) -> bool {
         if !ray.step().contains_cardinal(piece.side.forward_cardinal()) {
             return false;
         }
 
         if ray.step().try_direction::<Cardinal>().is_some()
-            && ((*piece.moved && ray.limit() == Some(2))
-                || (!piece.moved && ray.limit() == Some(1)))
+            && ((piece.moved && ray.limit() == Some(2)) || (!piece.moved && ray.limit() == Some(1)))
         {
             return false;
         }

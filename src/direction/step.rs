@@ -1,5 +1,5 @@
 use super::{Cardinal, Direction};
-use crate::UncheckedSpace;
+use crate::Space;
 use std::ops::{Add, Mul, Neg};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
@@ -62,8 +62,8 @@ impl Step {
         D::parse_step(*self)
     }
 
-    pub fn next_space(&self, start: UncheckedSpace) -> Option<UncheckedSpace> {
-        Some(UncheckedSpace::new(
+    pub fn next_space(&self, start: &Space) -> Option<Space> {
+        Some(Space::new(
             start.rank.checked_add_signed(self.ranks)?,
             start.file.checked_add_signed(self.files)?,
         ))

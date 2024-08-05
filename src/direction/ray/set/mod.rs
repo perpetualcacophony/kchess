@@ -1,3 +1,5 @@
+use crate::game::components::Piece;
+
 use super::{Cast, Ray};
 
 mod builder;
@@ -11,7 +13,7 @@ pub struct RaySet {
     #[cfg(feature = "smallvec")]
     rays: smallvec::SmallVec<[Ray; 8]>,
 
-    filter: fn(&crate::components::Piece, &Ray) -> bool,
+    filter: fn(&Piece, &Ray) -> bool,
 }
 
 impl Default for RaySet {
@@ -34,11 +36,11 @@ impl RaySet {
 
     pub fn cast<'a, 'b: 'a>(
         &'a self,
-        piece: &'b crate::components::Piece<'b>,
+        piece: &'b Piece,
     ) -> impl Iterator<Item = (&'a Ray, Cast<'a>)> + 'a {
         self.iter()
             .filter(move |ray| (self.filter)(piece, ray))
-            .map(move |ray| (ray, ray.cast(piece.space.as_unchecked())))
+            .map(move |ray| (ray, ray.cast(&piece.space)))
     }
 }
 

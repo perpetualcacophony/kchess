@@ -1,6 +1,6 @@
 use std::borrow::Borrow;
 
-use crate::direction::ray;
+use crate::{direction::ray, game::components::Piece};
 
 pub mod standard;
 pub use standard::{Bishop, King, Knight, Pawn, Queen, Rook};
@@ -56,7 +56,7 @@ pub trait PrimitivePiece: Sized {
 
     fn add_rays<'rays>(&self, set: &'rays mut ray::set::Builder) -> &'rays mut ray::set::Builder;
 
-    fn ray_enabled(_piece: &crate::components::Piece<'_>, _ray: &crate::direction::Ray) -> bool {
+    fn ray_enabled(_piece: &Piece, _ray: &crate::direction::Ray) -> bool {
         true
     }
 }

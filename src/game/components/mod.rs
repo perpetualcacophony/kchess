@@ -1,13 +1,7 @@
 use crate::{pieces::PieceData, ChessSide, Space};
 
-#[macro_use]
-mod macros;
-
 pub mod piece;
 pub use piece::Piece;
-
-pub mod piece_mut;
-pub use piece_mut::PieceMut;
 
 pub mod side;
 pub use side::Side;

@@ -14,7 +14,7 @@ pub use step::Step;
 pub trait Direction {
     fn as_step(&self) -> step::Step;
 
-    fn next_space(&self, start: crate::UncheckedSpace) -> Option<crate::UncheckedSpace> {
+    fn next_space(&self, start: &crate::Space) -> Option<crate::Space> {
         self.as_step().next_space(start)
     }
 
