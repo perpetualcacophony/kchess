@@ -5,7 +5,7 @@ mod space;
 pub mod pieces;
 
 mod context;
-pub use context::GameContext as Context;
+pub type Context<'a> = &'a context::GameContext<'a>;
 
 pub mod side;
 pub use side::Side;
@@ -37,7 +37,7 @@ impl Game {
         })
     }
 
-    pub fn context(&self) -> Context<'_> {
-        Context::from_game(self)
+    pub fn context(&self) -> context::GameContext<'_> {
+        context::GameContext::from_game(self)
     }
 }

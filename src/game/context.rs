@@ -24,6 +24,6 @@ impl<'a> GameContext<'a> {
         self.game
             .board
             .spaces()
-            .map(|space| SpaceContext::new(*self, space))
+            .map(|space| SpaceContext::new(self, space))
     }
 }

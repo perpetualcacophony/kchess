@@ -151,3 +151,16 @@ pub enum StandardItem {
     Queen(Queen),
     King(King),
 }
+
+pub trait CustomData<Data>: PrimitivePiece {
+    fn data(&self, core: PieceData) -> Data;
+}
+
+impl<T> CustomData<PieceData> for T
+where
+    T: PrimitivePiece,
+{
+    fn data(&self, core: PieceData) -> PieceData {
+        core
+    }
+}

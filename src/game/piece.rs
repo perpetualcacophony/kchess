@@ -1,4 +1,5 @@
 use crate::{
+    direction::ray,
     game::{space::SpaceContext, Context},
     ChessSide, Space,
 };
@@ -13,6 +14,10 @@ pub struct Piece {
 }
 
 impl Piece {
+    pub fn rays(&self) -> &ray::Set {
+        &self.data.rays
+    }
+
     pub fn dangerous_spaces<'a: 'b, 'b>(
         &'a self,
         ctx: Context<'b>,
@@ -30,7 +35,7 @@ impl Piece {
     }
 
     pub fn reachable_spaces<'a>(&'a self, ctx: Context<'a>) -> impl Iterator<Item = Space> + 'a {
-        self.data.rays.cast(self).flat_map(move |(ray, cast)| {
+        self.rays().cast(self).flat_map(move |(ray, cast)| {
             let cast = ctx.board().check_iter(cast);
             cast.take_while(move |space| {
                 let mut pieces = ctx.pieces().not_captured();
