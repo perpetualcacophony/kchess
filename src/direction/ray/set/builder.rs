@@ -1,6 +1,6 @@
 use crate::{
     direction::ray::{Builder, Ray},
-    game::Piece,
+    game::piece::PartialPiece,
     pieces::PrimitivePiece,
 };
 
@@ -9,7 +9,7 @@ use super::RaySet;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RaySetBuilder {
     builders: Vec<Builder>,
-    filter: fn(&Piece, &Ray) -> bool,
+    filter: fn(&PartialPiece, &Ray) -> bool,
 }
 
 impl Default for RaySetBuilder {

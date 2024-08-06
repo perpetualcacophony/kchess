@@ -1,51 +1,76 @@
+use std::sync::Arc;
+
 use crate::{
     direction::ray,
-    game::{space::SpaceContext, Context},
+    game::Context,
+    pieces::{PieceSet, StandardPiece},
     ChessSide, Space,
 };
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct Piece {
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct PartialPiece {
     pub moved: bool,
     pub space: Space,
-    pub data: crate::PieceData,
     pub side: ChessSide,
     pub captured: bool,
 }
 
-impl Piece {
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Piece<Set: PieceSet> {
+    pub piece: Arc<StandardPiece<Set::Piece>>,
+    partial: PartialPiece,
+}
+
+impl<Set: PieceSet> Piece<Set> {
     pub fn rays(&self) -> &ray::Set {
-        &self.data.rays
+        &self.piece.rays
+    }
+
+    pub fn partial(&self) -> &PartialPiece {
+        &self.partial
+    }
+
+    pub fn side(&self) -> &ChessSide {
+        &self.partial().side
+    }
+
+    pub fn captured(&self) -> bool {
+        self.partial().captured
     }
 
     pub fn dangerous_spaces<'a: 'b, 'b>(
         &'a self,
-        ctx: Context<'b>,
+        ctx: Context<'b, Set>,
     ) -> impl Iterator<Item = Space> + 'b {
         ctx.pieces()
             .clone()
             .filter_map(move |piece| {
-                (piece.side != self.side).then_some(piece.reachable_spaces(ctx))
+                (piece.side() != self.side()).then_some(piece.reachable_spaces(ctx))
             })
             .flatten()
     }
 
-    pub fn space<'ctx>(&self, ctx: Context<'ctx>) -> SpaceContext<'ctx> {
-        SpaceContext::new(ctx, self.space)
+    pub fn space(&self) -> &Space {
+        &self.partial().space
     }
 
-    pub fn reachable_spaces<'a>(&'a self, ctx: Context<'a>) -> impl Iterator<Item = Space> + 'a {
-        self.rays().cast(self).flat_map(move |(ray, cast)| {
-            let cast = ctx.board().check_iter(cast);
-            cast.take_while(move |space| {
-                let mut pieces = ctx.pieces().not_captured();
+    pub fn reachable_spaces<'a>(
+        &'a self,
+        ctx: Context<'a, Set>,
+    ) -> impl Iterator<Item = Space> + 'a {
+        self.rays()
+            .cast(self.partial())
+            .flat_map(move |(ray, cast)| {
+                let cast = ctx.board().check_iter(cast);
+                cast.take_while(move |space| {
+                    let mut pieces = ctx.pieces().not_captured();
 
-                if let Some(piece) = pieces.find(|piece| &piece.space == space) {
-                    piece.side != self.side && ray.capture()
-                } else {
-                    true
-                }
+                    if let Some(piece) = pieces.find(|piece| piece.space() == space) {
+                        piece.side() != self.side() && ray.capture()
+                    } else {
+                        true
+                    }
+                })
             })
-        })
     }
 }

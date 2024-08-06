@@ -1,19 +1,19 @@
-use crate::{game::Piece, Space};
+use crate::{game::Piece, pieces::PieceSet, Space};
 
 use super::Context;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct SpaceContext<'ctx> {
+pub struct SpaceContext<'ctx, Set: PieceSet> {
     inner: Space,
-    piece: Option<&'ctx Piece>,
-    threats: Vec<&'ctx Piece>,
+    piece: Option<&'ctx Piece<Set>>,
+    threats: Vec<&'ctx Piece<Set>>,
 }
 
-impl<'ctx> SpaceContext<'ctx> {
-    pub(super) fn new(ctx: Context<'ctx>, space: Space) -> Self {
+impl<'ctx, Set: PieceSet> SpaceContext<'ctx, Set> {
+    pub(super) fn new(ctx: Context<'ctx, Set>, space: Space) -> Self {
         Self {
             inner: space,
-            piece: ctx.pieces().find(|piece| piece.space == space),
+            piece: ctx.pieces().find(|piece| piece.space() == &space),
             threats: ctx
                 .pieces()
                 .filter(|piece| {
@@ -29,12 +29,12 @@ impl<'ctx> SpaceContext<'ctx> {
         &self.inner
     }
 
-    pub fn piece(&self) -> Option<&Piece> {
+    pub fn piece(&self) -> Option<&Piece<Set>> {
         self.piece
     }
 }
 
-impl AsRef<Space> for SpaceContext<'_> {
+impl<Set: PieceSet> AsRef<Space> for SpaceContext<'_, Set> {
     fn as_ref(&self) -> &Space {
         self.space()
     }

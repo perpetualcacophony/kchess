@@ -1,4 +1,4 @@
-use crate::game::Piece;
+use crate::game::piece::PartialPiece;
 
 use super::{Cast, Ray};
 
@@ -13,7 +13,7 @@ pub struct RaySet {
     #[cfg(feature = "smallvec")]
     rays: smallvec::SmallVec<[Ray; 8]>,
 
-    filter: fn(&Piece, &Ray) -> bool,
+    filter: fn(&PartialPiece, &Ray) -> bool,
 }
 
 impl Default for RaySet {
@@ -36,7 +36,7 @@ impl RaySet {
 
     pub fn cast<'a, 'b: 'a>(
         &'a self,
-        piece: &'b Piece,
+        piece: &'b PartialPiece,
     ) -> impl Iterator<Item = (&'a Ray, Cast<'a>)> + 'a {
         self.iter()
             .filter(move |ray| (self.filter)(piece, ray))
