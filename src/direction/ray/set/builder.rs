@@ -1,6 +1,6 @@
 use crate::{
     direction::ray::{Builder, Ray},
-    game::components::Piece,
+    game::Piece,
     pieces::PrimitivePiece,
 };
 

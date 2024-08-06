@@ -1,6 +1,6 @@
 use crate::board;
 
-use super::{AllPieces, Game};
+use super::{space::SpaceContext, AllPieces, Game};
 
 #[derive(Clone, Debug, Copy)]
 pub struct GameContext<'a> {
@@ -16,7 +16,14 @@ impl<'a> GameContext<'a> {
         self.game.pieces()
     }
 
-    pub fn board(&self) -> &'a board::Dimensions {
+    pub fn board(&self) -> &'a board::BoardDimensions {
         &self.game.board
+    }
+
+    pub fn spaces(&self) -> impl Iterator<Item = SpaceContext> {
+        self.game
+            .board
+            .spaces()
+            .map(|space| SpaceContext::new(*self, space))
     }
 }

@@ -3,7 +3,7 @@ use crate::{
         ray::{self, set::Builder as RaySetBuilder},
         Cardinal, Diagonal, Ray,
     },
-    game::components::Piece,
+    game::Piece,
 };
 
 use super::PrimitivePiece;

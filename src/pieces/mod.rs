@@ -1,6 +1,6 @@
 use std::borrow::Borrow;
 
-use crate::{direction::ray, game::components::Piece};
+use crate::{direction::ray, game::Piece};
 
 pub mod standard;
 pub use standard::{Bishop, King, Knight, Pawn, Queen, Rook};

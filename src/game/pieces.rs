@@ -1,6 +1,4 @@
-use crate::EntityId;
-
-use super::{components::Piece, Game};
+use super::Piece;
 
 #[derive(Clone, Copy, Debug)]
 pub struct AllPieces<I> {

@@ -1,25 +1,28 @@
-use crate::{board, ChessSide, EntityId, Space};
+use crate::{board, ChessSide, Space};
 
 mod space;
 
 pub mod pieces;
-use components::Piece;
 
 mod context;
 pub use context::GameContext as Context;
 
-pub mod components;
+pub mod side;
+pub use side::Side;
+
+pub mod piece;
+pub use piece::Piece;
 
 pub type AllPieces<'a> = pieces::AllPieces<std::slice::Iter<'a, Piece>>;
 
 #[derive(Clone, Debug)]
 pub struct Game {
-    board: board::Dimensions,
-    pieces: Vec<components::Piece>,
+    board: board::BoardDimensions,
+    pieces: Vec<Piece>,
 }
 
 impl Game {
-    pub fn piece_on(&self, space: Space) -> Option<&components::Piece> {
+    pub fn piece_on(&self, space: Space) -> Option<&Piece> {
         self.pieces().find(|piece| piece.space == space)
     }
 
@@ -27,8 +30,8 @@ impl Game {
         AllPieces::new(&self.pieces)
     }
 
-    pub fn sides(&self) -> [components::Side<'_>; 2] {
-        ChessSide::two().map(|side| components::Side {
+    pub fn sides(&self) -> [Side<'_>; 2] {
+        ChessSide::two().map(|side| Side {
             side,
             pieces: self.pieces().filter(|piece| piece.side == side).collect(),
         })

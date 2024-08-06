@@ -1,18 +1,27 @@
-use crate::{game::components::Piece, Space};
+use crate::{game::Piece, Space};
 
 use super::Context;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SpaceContext<'ctx> {
-    inner: &'ctx Space,
+    inner: Space,
     piece: Option<&'ctx Piece>,
+    threats: Vec<&'ctx Piece>,
 }
 
 impl<'ctx> SpaceContext<'ctx> {
-    pub(super) fn new(ctx: Context<'ctx>, space: &'ctx Space) -> Self {
+    pub(super) fn new(ctx: Context<'ctx>, space: Space) -> Self {
         Self {
             inner: space,
-            piece: ctx.pieces().find(|piece| &piece.space == space),
+            piece: ctx.pieces().find(|piece| piece.space == space),
+            threats: ctx
+                .pieces()
+                .filter(|piece| {
+                    piece
+                        .reachable_spaces(ctx)
+                        .any(|reachable| reachable == space)
+                })
+                .collect(),
         }
     }
 

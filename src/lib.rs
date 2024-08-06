@@ -14,7 +14,6 @@ pub mod id;
 pub use id::EntityId;
 
 pub mod board;
-pub use board::Board;
 
 pub mod game;
 pub use game::Game;

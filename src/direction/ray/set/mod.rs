@@ -1,4 +1,4 @@
-use crate::game::components::Piece;
+use crate::game::Piece;
 
 use super::{Cast, Ray};
 
