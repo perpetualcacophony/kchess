@@ -41,11 +41,11 @@ pub trait PrimitivePiece {
 }
 
 #[derive(Debug)]
-pub struct PieceNew {
+pub struct ChessPiece {
     components: PieceComponents,
 }
 
-impl PieceNew {
+impl ChessPiece {
     pub fn get<T: 'static>(&self) -> Option<&T> {
         self.components.get()
     }
@@ -164,12 +164,12 @@ impl PieceBuilder {
         self
     }
 
-    pub fn build(self) -> Option<PieceNew> {
+    pub fn build(self) -> Option<ChessPiece> {
         if !self.rays || !self.stats {
             return None;
         }
 
-        Some(PieceNew {
+        Some(ChessPiece {
             components: self.components.build(),
         })
     }

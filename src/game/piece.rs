@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{direction::ray, game::Context, pieces::PieceNew, ChessSide, Space};
+use crate::{direction::ray, game::Context, pieces::ChessPiece, ChessSide, Space};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PartialPiece {
@@ -12,7 +12,7 @@ pub struct PartialPiece {
 
 #[derive(Clone, Debug)]
 pub struct Piece {
-    pub piece: Arc<PieceNew>,
+    pub piece: Arc<ChessPiece>,
     partial: PartialPiece,
 }
 
