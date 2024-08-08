@@ -13,22 +13,22 @@ impl<I> AllPieces<I> {
     }
 }
 
-impl<'a, I> Iterator for AllPieces<I>
+impl<'a, 'set: 'a, I> Iterator for AllPieces<I>
 where
-    I: Iterator<Item = &'a Piece>,
+    I: Iterator<Item = &'a Piece<'set>>,
 {
-    type Item = &'a Piece;
+    type Item = &'a Piece<'set>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next()
     }
 }
 
-impl<'a, I> AllPieces<I>
+impl<'a, 'set: 'a, I> AllPieces<I>
 where
-    Self: Iterator<Item = &'a Piece>,
+    Self: Iterator<Item = &'a Piece<'set>>,
 {
-    pub fn not_captured(self) -> impl Iterator<Item = &'a Piece> {
+    pub fn not_captured(self) -> impl Iterator<Item = &'a Piece<'set>> {
         self.filter(|piece| !piece.captured())
     }
 }

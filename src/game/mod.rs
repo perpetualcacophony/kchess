@@ -1,11 +1,11 @@
-use crate::{board, ChessSide, Space};
+use crate::{board, pieces::Set, ChessSide, Space};
 
 mod space;
 
 pub mod pieces;
 
 mod context;
-pub type Context<'a> = &'a context::GameContext<'a>;
+pub type Context<'a, 'set> = &'a context::GameContext<'a, 'set>;
 
 pub mod side;
 pub use side::Side;
@@ -13,20 +13,21 @@ pub use side::Side;
 pub mod piece;
 pub use piece::Piece;
 
-pub type AllPieces<'a> = pieces::AllPieces<std::slice::Iter<'a, Piece>>;
+pub type AllPieces<'a, 'set> = pieces::AllPieces<std::slice::Iter<'a, Piece<'set>>>;
 
 #[derive(Debug)]
-pub struct Game {
+pub struct Game<'set> {
     board: board::BoardDimensions,
-    pieces: Vec<Piece>,
+    pieces: Vec<Piece<'set>>,
+    piece_set: Set,
 }
 
-impl Game {
-    pub fn piece_on(&self, space: Space) -> Option<&Piece> {
+impl<'set> Game<'set> {
+    pub fn piece_on(&self, space: Space) -> Option<&Piece<'set>> {
         self.pieces().find(|piece| piece.space() == &space)
     }
 
-    pub fn pieces(&self) -> AllPieces {
+    pub fn pieces(&self) -> AllPieces<'_, 'set> {
         AllPieces::new(&self.pieces)
     }
 
@@ -40,7 +41,7 @@ impl Game {
         })
     }
 
-    pub fn context(&self) -> context::GameContext<'_> {
+    pub fn context(&self) -> context::GameContext<'_, 'set> {
         context::GameContext::from_game(self)
     }
 }

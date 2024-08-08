@@ -14,6 +14,9 @@ pub use primitive::PrimitivePiece;
 mod stats;
 pub use stats::Stats as PieceStats;
 
+pub mod set;
+pub use set::PieceSet as Set;
+
 pub mod component;
 pub use component::{PieceComponent as Component, PieceComponents as Components};
 
