@@ -1,5 +1,3 @@
-use crate::pieces::PieceSet;
-
 use super::Piece;
 
 #[derive(Clone, Copy, Debug)]

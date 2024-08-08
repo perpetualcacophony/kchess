@@ -1,4 +1,4 @@
-use crate::{pieces::PieceSet, ChessSide};
+use crate::ChessSide;
 
 use super::Piece;
 

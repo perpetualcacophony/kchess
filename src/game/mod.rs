@@ -1,4 +1,4 @@
-use crate::{board, pieces::PieceSet, ChessSide, Space};
+use crate::{board, ChessSide, Space};
 
 mod space;
 

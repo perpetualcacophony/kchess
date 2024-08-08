@@ -1,11 +1,6 @@
 use std::sync::Arc;
 
-use crate::{
-    direction::ray,
-    game::Context,
-    pieces::{PieceNew, PieceSet},
-    ChessSide, Space,
-};
+use crate::{direction::ray, game::Context, pieces::PieceNew, ChessSide, Space};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PartialPiece {

@@ -1,4 +1,4 @@
-use crate::{game::Piece, pieces::PieceSet, Space};
+use crate::{game::Piece, Space};
 
 use super::Context;
 

@@ -166,12 +166,16 @@ pub struct PieceNew {
 }
 
 impl PieceNew {
+    pub fn get<T: 'static>(&self) -> Option<&T> {
+        self.components.get()
+    }
+
     pub fn rays(&self) -> &ray::Set {
-        self.components.expect()
+        self.get().unwrap()
     }
 
     pub fn stats(&self) -> &PieceStats {
-        self.components.expect()
+        self.get().unwrap()
     }
 
     pub fn from_builder(builder: PieceBuilder) -> Option<Self> {
@@ -229,6 +233,10 @@ impl PieceComponents {
         self.iter().find_map(PieceComponent::get)
     }
 
+    pub fn contains<T: 'static>(&self) -> bool {
+        self.get::<T>().is_some()
+    }
+
     pub fn get_mut<T: 'static>(&mut self) -> Option<&mut T> {
         self.iter_mut().find_map(PieceComponent::get_mut)
     }
@@ -250,10 +258,11 @@ impl FromIterator<PieceComponent> for PieceComponents {
     }
 }
 
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug)]
 pub struct PieceBuilder {
-    rays: Option<ray::Set>,
-    stats: Option<PieceStats>,
+    components: PieceComponentsBuilder,
+    rays: bool,
+    stats: bool,
 }
 
 impl PieceBuilder {
@@ -264,21 +273,74 @@ impl PieceBuilder {
     }
 
     pub fn rays(&mut self, value: ray::Set) -> &mut Self {
-        self.rays = Some(value);
+        self.rays = true;
+        self.add_component(PieceComponent::new(value));
         self
     }
 
     pub fn stats(&mut self, value: PieceStats) -> &mut Self {
-        self.stats = Some(value);
+        self.stats = true;
+        self.add_component(PieceComponent::new(value));
         self
     }
 
     pub fn build(self) -> Option<PieceNew> {
+        if !self.rays || !self.stats {
+            return None;
+        }
+
         Some(PieceNew {
-            components: PieceComponents::from_iter(vec![
-                PieceComponent::new(self.rays?),
-                PieceComponent::new(self.stats?),
-            ]),
+            components: self.components.build(),
         })
+    }
+}
+
+impl std::ops::Deref for PieceBuilder {
+    type Target = PieceComponentsBuilder;
+
+    fn deref(&self) -> &Self::Target {
+        &self.components
+    }
+}
+
+impl std::ops::DerefMut for PieceBuilder {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.components
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct PieceComponentsBuilder {
+    inner: Vec<PieceComponent>,
+}
+
+impl PieceComponentsBuilder {
+    pub fn build(self) -> PieceComponents {
+        PieceComponents { inner: self.inner }
+    }
+
+    pub fn new(inner: impl FnOnce(&mut Self) -> &mut Self) -> Self {
+        let mut new = Self::default();
+        inner(&mut new);
+        new
+    }
+
+    pub fn add_component(&mut self, component: PieceComponent) -> &mut Self {
+        self.inner.push(component);
+        self
+    }
+
+    pub fn add_components(
+        &mut self,
+        components: impl IntoIterator<Item = PieceComponent>,
+    ) -> &mut Self {
+        self.inner.extend(components);
+        self
+    }
+}
+
+impl Extend<PieceComponent> for PieceComponentsBuilder {
+    fn extend<T: IntoIterator<Item = PieceComponent>>(&mut self, iter: T) {
+        self.add_components(iter);
     }
 }
