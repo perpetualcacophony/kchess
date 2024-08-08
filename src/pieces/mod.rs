@@ -1,56 +1,9 @@
-use std::{any::Any, borrow::Borrow, collections::HashSet, fmt::Debug, sync::Arc};
+use std::{any::Any, fmt::Debug};
 
 use crate::{direction::ray, game::piece::PartialPiece};
 
 pub mod standard;
 pub use standard::{Bishop, King, Knight, Pawn, Queen, Rook};
-
-macro_rules! piece_set {
-    (
-        $Name:ident:
-        $(
-            $Piece:ident$(: $path:path)?
-        ),+
-    ) => {
-        #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-        pub enum $Name {
-            $(
-                $Piece
-            ),+
-        }
-
-        impl $crate::pieces::PieceSet for $Name {
-            fn stats(&self) -> $crate::pieces::PieceStats {
-                use $crate::pieces::Piece;
-
-                $(
-                    use $($path::)?$Piece;
-                )+
-
-                match self {
-                    $(
-                        Self::$Piece => <$(<$path>::)?$Piece>::stats(&$(<$path>::)?$Piece)
-                    ),+
-                }
-            }
-
-            fn rays(&self) -> $crate::direction::ray::Set {
-                use $crate::pieces::Piece;
-
-                match self {
-                    $(
-                        Self::$Piece => <$(<$path>::)?$Piece>::rays(&$(<$path>::)?$Piece)
-                    ),+
-                }
-            }
-        }
-    };
-}
-
-piece_set! {
-    StandardSet:
-    Pawn, Bishop, Knight, Rook, Queen, King
-}
 
 #[cfg(feature = "fairy")]
 pub mod fairy;
@@ -74,27 +27,6 @@ impl PieceStats {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct PieceData {
-    pub value: usize,
-    pub can_promote: bool,
-    pub valid_promotion: bool,
-    pub checkmate_possible: bool,
-    pub rays: ray::Set,
-}
-
-impl PieceData {
-    pub fn from_primitive<P: PrimitivePiece>() -> Self {
-        Self {
-            value: P::VALUE,
-            can_promote: P::CAN_PROMOTE,
-            valid_promotion: P::VALID_PROMOTION,
-            checkmate_possible: P::CHECKMATE_POSSIBLE,
-            rays: ray::Set::new(|builder| P::add_rays(builder)),
-        }
-    }
-}
-
 pub trait PrimitivePiece {
     const VALUE: usize;
     const CAN_PROMOTE: bool = false;
@@ -106,58 +38,6 @@ pub trait PrimitivePiece {
     fn ray_enabled(_piece: &PartialPiece, _ray: &crate::direction::Ray) -> bool {
         true
     }
-}
-
-pub trait Piece {
-    fn stats(&self) -> PieceStats;
-    fn rays(&self) -> ray::Set;
-}
-
-impl<T: PrimitivePiece> Piece for T {
-    fn stats(&self) -> PieceStats {
-        PieceStats::from_primitive::<Self>()
-    }
-
-    fn rays(&self) -> ray::Set {
-        todo!()
-        //ray::Set::new(|builder| self.add_rays(builder))
-    }
-}
-
-#[derive(Debug)]
-pub struct ArcPiece<Set> {
-    inner: Arc<ArcPieceInner<Set>>,
-}
-
-impl<T> Clone for ArcPiece<T> {
-    fn clone(&self) -> Self {
-        Self {
-            inner: self.inner.clone(),
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct ArcPieceInner<Set> {
-    pub piece: Set,
-    pub stats: PieceStats,
-    pub rays: ray::Set,
-}
-
-#[derive(Debug)]
-pub struct PieceSetContainer<Set> {
-    vec: Vec<ArcPiece<Set>>,
-}
-
-impl<Set> PieceSetContainer<Set> {
-    fn iter(&self) -> impl Iterator<Item = ArcPiece<Set>> + '_ {
-        self.vec.iter().cloned()
-    }
-}
-
-pub trait PieceSet {
-    fn stats(&self) -> PieceStats;
-    fn rays(&self) -> ray::Set;
 }
 
 #[derive(Debug)]

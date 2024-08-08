@@ -1,5 +1,4 @@
 pub mod pieces;
-pub use pieces::PieceData;
 
 pub mod space;
 pub use space::Space;
