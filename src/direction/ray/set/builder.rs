@@ -66,8 +66,8 @@ impl RaySetBuilder {
         self
     }
 
-    pub fn add_piece<P: PrimitivePiece>(&mut self, kind: impl std::borrow::Borrow<P>) -> &mut Self {
-        P::add_rays(kind.borrow(), self).add_filter::<P>()
+    pub fn add_piece<P: PrimitivePiece>(&mut self) -> &mut Self {
+        P::add_rays(self)
     }
 
     pub fn add_filter<P: PrimitivePiece>(&mut self) -> &mut Self {

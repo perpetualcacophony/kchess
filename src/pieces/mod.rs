@@ -1,9 +1,56 @@
-use std::{borrow::Borrow, fmt::Debug, sync::Arc};
+use std::{any::Any, borrow::Borrow, collections::HashSet, fmt::Debug, sync::Arc};
 
 use crate::{direction::ray, game::piece::PartialPiece};
 
 pub mod standard;
 pub use standard::{Bishop, King, Knight, Pawn, Queen, Rook};
+
+macro_rules! piece_set {
+    (
+        $Name:ident:
+        $(
+            $Piece:ident$(: $path:path)?
+        ),+
+    ) => {
+        #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+        pub enum $Name {
+            $(
+                $Piece
+            ),+
+        }
+
+        impl $crate::pieces::PieceSet for $Name {
+            fn stats(&self) -> $crate::pieces::PieceStats {
+                use $crate::pieces::Piece;
+
+                $(
+                    use $($path::)?$Piece;
+                )+
+
+                match self {
+                    $(
+                        Self::$Piece => <$(<$path>::)?$Piece>::stats(&$(<$path>::)?$Piece)
+                    ),+
+                }
+            }
+
+            fn rays(&self) -> $crate::direction::ray::Set {
+                use $crate::pieces::Piece;
+
+                match self {
+                    $(
+                        Self::$Piece => <$(<$path>::)?$Piece>::rays(&$(<$path>::)?$Piece)
+                    ),+
+                }
+            }
+        }
+    };
+}
+
+piece_set! {
+    StandardSet:
+    Pawn, Bishop, Knight, Rook, Queen, King
+}
 
 #[cfg(feature = "fairy")]
 pub mod fairy;
@@ -37,24 +84,24 @@ pub struct PieceData {
 }
 
 impl PieceData {
-    pub fn from_primitive<P: PrimitivePiece>(piece: impl Borrow<P>) -> Self {
+    pub fn from_primitive<P: PrimitivePiece>() -> Self {
         Self {
             value: P::VALUE,
             can_promote: P::CAN_PROMOTE,
             valid_promotion: P::VALID_PROMOTION,
             checkmate_possible: P::CHECKMATE_POSSIBLE,
-            rays: ray::Set::new(|builder| piece.borrow().add_rays(builder)),
+            rays: ray::Set::new(|builder| P::add_rays(builder)),
         }
     }
 }
 
-pub trait PrimitivePiece: Sized {
+pub trait PrimitivePiece {
     const VALUE: usize;
     const CAN_PROMOTE: bool = false;
     const VALID_PROMOTION: bool = true;
     const CHECKMATE_POSSIBLE: bool = false;
 
-    fn add_rays<'rays>(&self, set: &'rays mut ray::set::Builder) -> &'rays mut ray::set::Builder;
+    fn add_rays(set: &mut ray::set::Builder) -> &mut ray::set::Builder;
 
     fn ray_enabled(_piece: &PartialPiece, _ray: &crate::direction::Ray) -> bool {
         true
@@ -63,7 +110,6 @@ pub trait PrimitivePiece: Sized {
 
 pub trait Piece {
     fn stats(&self) -> PieceStats;
-
     fn rays(&self) -> ray::Set;
 }
 
@@ -73,95 +119,166 @@ impl<T: PrimitivePiece> Piece for T {
     }
 
     fn rays(&self) -> ray::Set {
-        ray::Set::new(|builder| self.add_rays(builder))
-    }
-}
-
-pub trait PieceSet {
-    type Piece: Piece + Debug + PartialEq + Eq;
-
-    fn pieces(&self) -> impl IntoIterator<Item = Arc<StandardPiece<Self::Piece>>>;
-
-    fn promotions(&self) -> impl Iterator<Item = Arc<StandardPiece<Self::Piece>>> {
-        self.pieces()
-            .into_iter()
-            .filter(|piece| piece.kind.stats().valid_promotion)
+        todo!()
+        //ray::Set::new(|builder| self.add_rays(builder))
     }
 }
 
 #[derive(Debug)]
-pub struct StandardSet {
-    pieces: [Arc<StandardPiece<StandardPieceKind>>; 6],
+pub struct ArcPiece<Set> {
+    inner: Arc<ArcPieceInner<Set>>,
 }
 
-impl PieceSet for StandardSet {
-    type Piece = StandardPieceKind;
-
-    fn pieces(&self) -> impl IntoIterator<Item = Arc<StandardPiece<Self::Piece>>> {
-        self.pieces.clone()
+impl<T> Clone for ArcPiece<T> {
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+        }
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub struct StandardPiece<Kind> {
-    pub kind: Kind,
+#[derive(Clone, Debug)]
+pub struct ArcPieceInner<Set> {
+    pub piece: Set,
     pub stats: PieceStats,
     pub rays: ray::Set,
 }
 
-impl<Kind: Piece> StandardPiece<Kind> {
-    pub fn new(kind: Kind) -> Self {
+#[derive(Debug)]
+pub struct PieceSetContainer<Set> {
+    vec: Vec<ArcPiece<Set>>,
+}
+
+impl<Set> PieceSetContainer<Set> {
+    fn iter(&self) -> impl Iterator<Item = ArcPiece<Set>> + '_ {
+        self.vec.iter().cloned()
+    }
+}
+
+pub trait PieceSet {
+    fn stats(&self) -> PieceStats;
+    fn rays(&self) -> ray::Set;
+}
+
+#[derive(Debug)]
+pub struct PieceNew {
+    components: PieceComponents,
+}
+
+impl PieceNew {
+    pub fn rays(&self) -> &ray::Set {
+        self.components.expect()
+    }
+
+    pub fn stats(&self) -> &PieceStats {
+        self.components.expect()
+    }
+
+    pub fn from_builder(builder: PieceBuilder) -> Option<Self> {
+        builder.build()
+    }
+
+    pub fn from_primitive<P: PrimitivePiece>() -> Self {
+        Self::from_builder(PieceBuilder::new(|builder| {
+            builder
+                .rays(ray::Set::new(P::add_rays))
+                .stats(PieceStats::from_primitive::<P>())
+        }))
+        .unwrap()
+    }
+}
+
+#[derive(Debug)]
+pub struct PieceComponent {
+    inner: Box<dyn Any>,
+}
+
+impl PieceComponent {
+    pub fn new<T: 'static + Any>(value: T) -> Self {
         Self {
-            stats: kind.stats(),
-            rays: kind.rays(),
-            kind,
+            inner: Box::new(value),
+        }
+    }
+
+    pub fn get<T: 'static>(&self) -> Option<&T> {
+        self.inner.downcast_ref()
+    }
+
+    pub fn get_mut<T: 'static>(&mut self) -> Option<&mut T> {
+        self.inner.downcast_mut()
+    }
+}
+
+#[derive(Debug)]
+pub struct PieceComponents {
+    inner: Vec<PieceComponent>,
+}
+
+impl PieceComponents {
+    pub fn iter(&self) -> impl Iterator<Item = &PieceComponent> {
+        self.inner.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut PieceComponent> {
+        self.inner.iter_mut()
+    }
+}
+
+impl PieceComponents {
+    pub fn get<T: 'static>(&self) -> Option<&T> {
+        self.iter().find_map(PieceComponent::get)
+    }
+
+    pub fn get_mut<T: 'static>(&mut self) -> Option<&mut T> {
+        self.iter_mut().find_map(PieceComponent::get_mut)
+    }
+
+    pub fn expect<T: 'static>(&self) -> &T {
+        self.get().unwrap()
+    }
+
+    pub fn expect_mut<T: 'static>(&mut self) -> &mut T {
+        self.get_mut().unwrap()
+    }
+}
+
+impl FromIterator<PieceComponent> for PieceComponents {
+    fn from_iter<T: IntoIterator<Item = PieceComponent>>(iter: T) -> Self {
+        Self {
+            inner: Vec::from_iter(iter),
         }
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub enum StandardPieceKind {
-    Pawn,
-    Knight,
-    Bishop,
-    Rook,
-    Queen,
-    King,
+#[derive(Default, Debug, Clone)]
+pub struct PieceBuilder {
+    rays: Option<ray::Set>,
+    stats: Option<PieceStats>,
 }
 
-impl Piece for StandardPieceKind {
-    fn stats(&self) -> PieceStats {
-        match self {
-            Self::Pawn => Pawn::stats(&Pawn),
-            Self::Knight => Knight::stats(&Knight),
-            Self::Bishop => Bishop::stats(&Bishop),
-            Self::Rook => Rook::stats(&Rook),
-            Self::Queen => Queen::stats(&Queen),
-            Self::King => King::stats(&King),
-        }
+impl PieceBuilder {
+    pub fn new(inner: impl FnOnce(&mut Self) -> &mut Self) -> Self {
+        let mut new = Self::default();
+        inner(&mut new);
+        new
     }
 
-    fn rays(&self) -> ray::Set {
-        match self {
-            Self::Pawn => Pawn.rays(),
-            Self::Knight => Knight.rays(),
-            Self::Bishop => Bishop.rays(),
-            Self::Rook => Rook.rays(),
-            Self::Queen => Queen.rays(),
-            Self::King => King.rays(),
-        }
+    pub fn rays(&mut self, value: ray::Set) -> &mut Self {
+        self.rays = Some(value);
+        self
     }
-}
 
-pub trait CustomData<Data>: PrimitivePiece {
-    fn data(&self, core: PieceData) -> Data;
-}
+    pub fn stats(&mut self, value: PieceStats) -> &mut Self {
+        self.stats = Some(value);
+        self
+    }
 
-impl<T> CustomData<PieceData> for T
-where
-    T: PrimitivePiece,
-{
-    fn data(&self, core: PieceData) -> PieceData {
-        core
+    pub fn build(self) -> Option<PieceNew> {
+        Some(PieceNew {
+            components: PieceComponents::from_iter(vec![
+                PieceComponent::new(self.rays?),
+                PieceComponent::new(self.stats?),
+            ]),
+        })
     }
 }

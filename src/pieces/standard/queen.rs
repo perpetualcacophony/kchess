@@ -8,7 +8,7 @@ pub struct Queen;
 impl PrimitivePiece for Queen {
     const VALUE: usize = 9;
 
-    fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
-        set.add_piece(Bishop).add_piece(Rook)
+    fn add_rays(set: &mut RaySetBuilder) -> &mut RaySetBuilder {
+        set.add_piece::<Bishop>().add_piece::<Rook>()
     }
 }

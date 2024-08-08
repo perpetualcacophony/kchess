@@ -2,18 +2,18 @@ use crate::{pieces::PieceSet, ChessSide};
 
 use super::Piece;
 
-pub struct Side<'ctx, Set: PieceSet> {
+pub struct Side<'ctx> {
     pub side: ChessSide,
-    pub pieces: Vec<&'ctx Piece<Set>>,
+    pub pieces: Vec<&'ctx Piece>,
 }
 
-impl<'c, Set: PieceSet> Side<'c, Set> {
+impl<'c> Side<'c> {
     pub fn material(&self) -> usize {
         self.active_pieces()
-            .fold(0, |total, piece| total + piece.piece.stats.value)
+            .fold(0, |total, piece| total + piece.piece.stats().value)
     }
 
-    pub fn active_pieces(&self) -> impl Iterator<Item = &Piece<Set>> {
+    pub fn active_pieces(&self) -> impl Iterator<Item = &Piece> {
         self.pieces
             .iter()
             .filter(|piece| !piece.captured())

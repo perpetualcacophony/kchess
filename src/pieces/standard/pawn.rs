@@ -16,7 +16,7 @@ impl PrimitivePiece for Pawn {
     const CAN_PROMOTE: bool = true;
     const VALID_PROMOTION: bool = false;
 
-    fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
+    fn add_rays(set: &mut RaySetBuilder) -> &mut RaySetBuilder {
         set.add_many(Diagonal::ARRAY.map(|direction| ray::Builder::new(direction).once()))
             .add_many(Cardinal::ARRAY.map(|direction| ray::Builder::new(direction).once()))
             .add_many(Cardinal::ARRAY.map(|direction| ray::Builder::new(direction).some_limit(2)))

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
     direction::ray,
     game::Context,
-    pieces::{PieceSet, StandardPiece},
+    pieces::{PieceNew, PieceSet},
     ChessSide, Space,
 };
 
@@ -15,15 +15,15 @@ pub struct PartialPiece {
     pub captured: bool,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct Piece<Set: PieceSet> {
-    pub piece: Arc<StandardPiece<Set::Piece>>,
+#[derive(Clone, Debug)]
+pub struct Piece {
+    pub piece: Arc<PieceNew>,
     partial: PartialPiece,
 }
 
-impl<Set: PieceSet> Piece<Set> {
+impl Piece {
     pub fn rays(&self) -> &ray::Set {
-        &self.piece.rays
+        self.piece.rays()
     }
 
     pub fn partial(&self) -> &PartialPiece {
@@ -40,7 +40,7 @@ impl<Set: PieceSet> Piece<Set> {
 
     pub fn dangerous_spaces<'a: 'b, 'b>(
         &'a self,
-        ctx: Context<'b, Set>,
+        ctx: Context<'b>,
     ) -> impl Iterator<Item = Space> + 'b {
         ctx.pieces()
             .clone()
@@ -54,10 +54,7 @@ impl<Set: PieceSet> Piece<Set> {
         &self.partial().space
     }
 
-    pub fn reachable_spaces<'a>(
-        &'a self,
-        ctx: Context<'a, Set>,
-    ) -> impl Iterator<Item = Space> + 'a {
+    pub fn reachable_spaces<'a>(&'a self, ctx: Context<'a>) -> impl Iterator<Item = Space> + 'a {
         self.rays()
             .cast(self.partial())
             .flat_map(move |(ray, cast)| {

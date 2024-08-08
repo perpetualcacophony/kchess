@@ -85,7 +85,7 @@ pub struct Knight;
 impl PrimitivePiece for Knight {
     const VALUE: usize = 2;
 
-    fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
+    fn add_rays(set: &mut RaySetBuilder) -> &mut RaySetBuilder {
         set.add_many(
             KnightDirection::array().map(|direction| ray::Builder::new(direction).some_limit(1)),
         )

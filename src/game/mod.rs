@@ -5,7 +5,7 @@ mod space;
 pub mod pieces;
 
 mod context;
-pub type Context<'a, Set> = &'a context::GameContext<'a, Set>;
+pub type Context<'a> = &'a context::GameContext<'a>;
 
 pub mod side;
 pub use side::Side;
@@ -13,25 +13,24 @@ pub use side::Side;
 pub mod piece;
 pub use piece::Piece;
 
-pub type AllPieces<'a, Set> = pieces::AllPieces<std::slice::Iter<'a, Piece<Set>>>;
+pub type AllPieces<'a> = pieces::AllPieces<std::slice::Iter<'a, Piece>>;
 
 #[derive(Debug)]
-pub struct Game<Set: PieceSet> {
+pub struct Game {
     board: board::BoardDimensions,
-    pieces: Vec<Piece<Set>>,
-    piece_set: Set,
+    pieces: Vec<Piece>,
 }
 
-impl<Set: PieceSet> Game<Set> {
-    pub fn piece_on(&self, space: Space) -> Option<&Piece<Set>> {
+impl Game {
+    pub fn piece_on(&self, space: Space) -> Option<&Piece> {
         self.pieces().find(|piece| piece.space() == &space)
     }
 
-    pub fn pieces(&self) -> AllPieces<Set> {
+    pub fn pieces(&self) -> AllPieces {
         AllPieces::new(&self.pieces)
     }
 
-    pub fn sides(&self) -> [Side<Set>; 2] {
+    pub fn sides(&self) -> [Side; 2] {
         ChessSide::two().map(|side| Side {
             side,
             pieces: self
@@ -41,7 +40,7 @@ impl<Set: PieceSet> Game<Set> {
         })
     }
 
-    pub fn context(&self) -> context::GameContext<'_, Set> {
+    pub fn context(&self) -> context::GameContext<'_> {
         context::GameContext::from_game(self)
     }
 }

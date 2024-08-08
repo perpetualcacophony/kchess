@@ -8,7 +8,7 @@ impl PrimitivePiece for RoyalQueen {
     const VALID_PROMOTION: bool = false;
     const CHECKMATE_POSSIBLE: bool = true;
 
-    fn add_rays<'rays>(&self, set: &'rays mut RaySetBuilder) -> &'rays mut RaySetBuilder {
-        set.add_piece(standard::Queen)
+    fn add_rays(set: &mut RaySetBuilder) -> &mut RaySetBuilder {
+        set.add_piece::<standard::Queen>()
     }
 }
