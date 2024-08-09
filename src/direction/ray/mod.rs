@@ -53,7 +53,16 @@ impl Ray {
 
     pub fn in_path(&self, start: &Space, target: &Space) -> bool {
         start.distance_step(target).is_some_and(|step| {
-            step.ranks % self.step.ranks == 0 && step.files % self.step.files == 0
+            if step.ranks % self.step.ranks == 0 && step.files % self.step.files == 0 {
+                if let Some(limit) = self.limit() {
+                    step.ranks / self.step.ranks == limit as isize
+                        && step.files / self.step.files == limit as isize
+                } else {
+                    true
+                }
+            } else {
+                false
+            }
         })
     }
 }
