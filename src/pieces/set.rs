@@ -1,4 +1,4 @@
-use super::ChessPiece;
+use super::{ChessPiece, PrimitivePiece};
 
 #[derive(Debug)]
 pub struct PieceSet {
@@ -8,6 +8,10 @@ pub struct PieceSet {
 impl PieceSet {
     pub fn iter(&self) -> Iter {
         Iter::new(&self.inner)
+    }
+
+    pub fn promotions(&self) -> impl Iterator<Item = &ChessPiece> {
+        self.iter().filter(|piece| piece.valid_promotion())
     }
 }
 
@@ -30,12 +34,12 @@ impl FromIterator<ChessPiece> for PieceSet {
 
 pub fn standard() -> PieceSet {
     PieceSet::from_iter([
-        ChessPiece::from_primitive::<super::Pawn>(),
-        ChessPiece::from_primitive::<super::Knight>(),
-        ChessPiece::from_primitive::<super::Bishop>(),
-        ChessPiece::from_primitive::<super::Rook>(),
-        ChessPiece::from_primitive::<super::Queen>(),
-        ChessPiece::from_primitive::<super::King>(),
+        super::Pawn::chess_piece(),
+        super::Knight::chess_piece(),
+        super::Bishop::chess_piece(),
+        super::Rook::chess_piece(),
+        super::Queen::chess_piece(),
+        super::King::chess_piece(),
     ])
 }
 

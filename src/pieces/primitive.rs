@@ -1,5 +1,7 @@
 use crate::{direction::ray, game::piece::PartialPiece};
 
+use super::ChessPiece;
+
 pub trait PrimitivePiece {
     const VALUE: usize;
     const CAN_PROMOTE: bool = false;
@@ -10,5 +12,12 @@ pub trait PrimitivePiece {
 
     fn ray_enabled(_piece: &PartialPiece, _ray: &crate::direction::Ray) -> bool {
         true
+    }
+
+    fn chess_piece() -> ChessPiece
+    where
+        Self: Sized,
+    {
+        ChessPiece::from_primitive::<Self>()
     }
 }

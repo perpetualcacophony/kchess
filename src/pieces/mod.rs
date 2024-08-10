@@ -38,6 +38,14 @@ impl ChessPiece {
         self.get().unwrap()
     }
 
+    pub fn can_promote(&self) -> bool {
+        self.stats().can_promote
+    }
+
+    pub fn valid_promotion(&self) -> bool {
+        self.stats().valid_promotion
+    }
+
     pub fn from_builder(builder: PieceBuilder) -> Option<Self> {
         builder.build()
     }
