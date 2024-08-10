@@ -100,28 +100,51 @@ impl<'ray> Iterator for Steps<'ray> {
 }
 
 pub struct Cast<'ray, 'start> {
-    steps: Steps<'ray>,
-    current: Space,
+    partial: PartialCast<'ray>,
     pub meta: CastMeta<'ray, 'start>,
 }
 
 impl<'ray, 'start> Cast<'ray, 'start> {
     fn new(ray: &'ray Ray, start: &'start Space) -> Self {
         Self {
-            steps: ray.steps(),
-            current: *start,
+            partial: PartialCast::new(ray, *start),
             meta: CastMeta { ray, start },
         }
     }
 
-    pub fn ray(&self) -> &Ray {
-        self.meta.ray
+    pub fn meta(&self) -> &CastMeta<'ray, 'start> {
+        &self.meta
     }
+}
 
+impl<'ray> Iterator for Cast<'ray, '_> {
+    type Item = Space;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.partial.next()
+    }
+}
+
+impl FusedIterator for Cast<'_, '_> {}
+
+impl<'ray, 'start> std::ops::Deref for Cast<'ray, 'start> {
+    type Target = CastMeta<'ray, 'start>;
+
+    fn deref(&self) -> &Self::Target {
+        self.meta()
+    }
+}
+
+pub struct CastMeta<'ray, 'start> {
+    pub ray: &'ray Ray,
+    pub start: &'start Space,
+}
+
+impl CastMeta<'_, '_> {
     pub fn intersects(&self, space: &Space) -> bool {
-        self.meta.start.distance_step(space).is_some_and(|step| {
-            step.div_exact(self.ray().step()).is_some_and(|quotient| {
-                if let Some(limit) = self.ray().limit() {
+        self.start.distance_step(space).is_some_and(|step| {
+            step.div_exact(self.ray.step()).is_some_and(|quotient| {
+                if let Some(limit) = self.ray.limit() {
                     quotient.unsigned_abs() <= limit
                 } else {
                     true
@@ -129,9 +152,31 @@ impl<'ray, 'start> Cast<'ray, 'start> {
             })
         })
     }
+
+    pub fn ray(&self) -> &Ray {
+        self.ray
+    }
+
+    pub fn start(&self) -> &Space {
+        self.start
+    }
 }
 
-impl<'ray> Iterator for Cast<'ray, '_> {
+pub struct PartialCast<'ray> {
+    steps: Steps<'ray>,
+    current: Space,
+}
+
+impl<'ray> PartialCast<'ray> {
+    fn new(ray: &'ray Ray, start: Space) -> Self {
+        Self {
+            steps: ray.steps(),
+            current: start,
+        }
+    }
+}
+
+impl<'ray> Iterator for PartialCast<'ray> {
     type Item = Space;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -140,9 +185,4 @@ impl<'ray> Iterator for Cast<'ray, '_> {
     }
 }
 
-impl FusedIterator for Cast<'_, '_> {}
-
-pub struct CastMeta<'ray, 'start> {
-    pub ray: &'ray Ray,
-    pub start: &'start Space,
-}
+impl FusedIterator for PartialCast<'_> {}
