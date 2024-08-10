@@ -100,28 +100,26 @@ impl<'ray> Iterator for Steps<'ray> {
 }
 
 pub struct Cast<'ray, 'start> {
-    ray: &'ray Ray,
     steps: Steps<'ray>,
-    start: &'start Space,
     current: Space,
+    pub meta: CastMeta<'ray, 'start>,
 }
 
 impl<'ray, 'start> Cast<'ray, 'start> {
     fn new(ray: &'ray Ray, start: &'start Space) -> Self {
         Self {
-            ray,
             steps: ray.steps(),
-            start,
             current: *start,
+            meta: CastMeta { ray, start },
         }
     }
 
     pub fn ray(&self) -> &Ray {
-        self.ray
+        self.meta.ray
     }
 
     pub fn intersects(&self, space: &Space) -> bool {
-        self.start.distance_step(space).is_some_and(|step| {
+        self.meta.start.distance_step(space).is_some_and(|step| {
             step.div_exact(self.ray().step()).is_some_and(|quotient| {
                 if let Some(limit) = self.ray().limit() {
                     quotient.unsigned_abs() <= limit
@@ -143,3 +141,8 @@ impl<'ray> Iterator for Cast<'ray, '_> {
 }
 
 impl FusedIterator for Cast<'_, '_> {}
+
+pub struct CastMeta<'ray, 'start> {
+    pub ray: &'ray Ray,
+    pub start: &'start Space,
+}
