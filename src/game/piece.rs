@@ -51,19 +51,18 @@ impl Piece<'_> {
         &'a self,
         ctx: Context<'a, '_>,
     ) -> impl Iterator<Item = Space> + 'a {
-        self.rays()
-            .cast(self.partial())
-            .flat_map(move |(ray, cast)| {
-                let cast = ctx.board().check_iter(cast);
-                cast.take_while(move |space| {
-                    let mut pieces = ctx.pieces().not_captured();
+        self.rays().cast(self.partial()).flat_map(move |cast| {
+            let capture = cast.ray().capture();
+            let cast = ctx.board().check_iter(cast);
+            cast.take_while(move |space| {
+                let mut pieces = ctx.pieces().not_captured();
 
-                    if let Some(piece) = pieces.find(|piece| piece.space() == space) {
-                        piece.side() != self.side() && ray.capture()
-                    } else {
-                        true
-                    }
-                })
+                if let Some(piece) = pieces.find(|piece| piece.space() == space) {
+                    piece.side() != self.side() && capture
+                } else {
+                    true
+                }
             })
+        })
     }
 }

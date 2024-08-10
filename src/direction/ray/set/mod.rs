@@ -1,4 +1,4 @@
-use crate::game::piece::PartialPiece;
+use crate::{game::piece::PartialPiece, Space};
 
 use super::{Cast, Ray};
 
@@ -34,13 +34,19 @@ impl RaySet {
         Builder::new(inner).build()
     }
 
+    pub fn enabled<'a, 'b: 'a>(&'a self, piece: &'b PartialPiece) -> impl Iterator<Item = &'a Ray> {
+        self.iter().filter(move |ray| (self.filter)(piece, ray))
+    }
+
     pub fn cast<'a, 'b: 'a>(
         &'a self,
         piece: &'b PartialPiece,
-    ) -> impl Iterator<Item = (&'a Ray, Cast<'a>)> + 'a {
-        self.iter()
-            .filter(move |ray| (self.filter)(piece, ray))
-            .map(move |ray| (ray, ray.cast(&piece.space)))
+    ) -> impl Iterator<Item = Cast<'a, 'b>> + 'a {
+        self.enabled(piece).map(move |ray| ray.cast(&piece.space))
+    }
+
+    pub fn intersection(&self, start: &Space, target: &Space) -> Option<&Ray> {
+        self.iter().find(|ray| ray.intersects(start, target))
     }
 }
 

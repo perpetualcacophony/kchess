@@ -73,6 +73,23 @@ impl Step {
         let sum = (self.ranks.pow(2) + self.ranks.pow(2)) as f64;
         sum.sqrt()
     }
+
+    pub fn divisible(self, rhs: Self) -> bool {
+        self.ranks.checked_rem(rhs.ranks) == Some(0) && self.files.checked_rem(rhs.files) == Some(0)
+    }
+
+    pub fn checked_div(self, rhs: Self) -> Option<Self> {
+        Some(Self::new(
+            self.ranks.checked_div(rhs.ranks)?,
+            self.files.checked_div(rhs.files)?,
+        ))
+    }
+
+    pub fn div_exact(self, rhs: Self) -> Option<isize> {
+        self.divisible(rhs)
+            .then(|| self.ranks.checked_div(rhs.ranks))
+            .flatten()
+    }
 }
 
 impl Add for Step {

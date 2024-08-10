@@ -1,3 +1,5 @@
+use std::iter::FusedIterator;
+
 use super::step::Step;
 use crate::Space;
 
@@ -39,7 +41,7 @@ impl Ray {
         self.limit
     }
 
-    pub fn cast(&self, start: &Space) -> Cast {
+    pub fn cast<'start>(&self, start: &'start Space) -> Cast<'_, 'start> {
         Cast::new(self, start)
     }
 
@@ -51,7 +53,7 @@ impl Ray {
         }
     }
 
-    pub fn in_path(&self, start: &Space, target: &Space) -> bool {
+    pub fn intersects(&self, start: &Space, target: &Space) -> bool {
         start.distance_step(target).is_some_and(|step| {
             if step.ranks % self.step.ranks == 0 && step.files % self.step.files == 0 {
                 if let Some(limit) = self.limit() {
@@ -97,33 +99,47 @@ impl<'ray> Iterator for Steps<'ray> {
     }
 }
 
-type CastInner<'ray> =
-    std::iter::Scan<Steps<'ray>, Space, fn(&mut Space, <Steps as Iterator>::Item) -> Option<Space>>;
-
-pub struct Cast<'ray> {
-    inner: CastInner<'ray>,
+pub struct Cast<'ray, 'start> {
+    ray: &'ray Ray,
+    steps: Steps<'ray>,
+    start: &'start Space,
+    current: Space,
 }
 
-impl<'ray> Cast<'ray> {
-    fn new(ray: &'ray Ray, start: &Space) -> Self {
+impl<'ray, 'start> Cast<'ray, 'start> {
+    fn new(ray: &'ray Ray, start: &'start Space) -> Self {
         Self {
-            inner: ray.steps().scan(*start, |start, step| {
-                if let Some(next) = step.next_space(start) {
-                    *start = next;
-
-                    Some(next)
-                } else {
-                    None
-                }
-            }),
+            ray,
+            steps: ray.steps(),
+            start,
+            current: *start,
         }
+    }
+
+    pub fn ray(&self) -> &Ray {
+        self.ray
+    }
+
+    pub fn intersects(&self, space: &Space) -> bool {
+        self.start.distance_step(space).is_some_and(|step| {
+            step.div_exact(self.ray().step()).is_some_and(|quotient| {
+                if let Some(limit) = self.ray().limit() {
+                    quotient.unsigned_abs() <= limit
+                } else {
+                    true
+                }
+            })
+        })
     }
 }
 
-impl<'ray> Iterator for Cast<'ray> {
+impl<'ray> Iterator for Cast<'ray, '_> {
     type Item = Space;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
+        self.current = self.steps.next()?.next_space(&self.current)?;
+        Some(self.current)
     }
 }
+
+impl FusedIterator for Cast<'_, '_> {}
