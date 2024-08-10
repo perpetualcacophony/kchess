@@ -3,12 +3,12 @@ use crate::board;
 use super::{space::SpaceContext, AllPieces, Game};
 
 #[derive(Clone, Debug, Copy)]
-pub struct GameContext<'a, 'set> {
-    game: &'a Game<'set>,
+pub struct GameContext<'a, 'set, Set> {
+    game: &'a Game<'set, Set>,
 }
 
-impl<'a, 'set> GameContext<'a, 'set> {
-    pub(super) fn from_game(game: &'a Game<'set>) -> Self {
+impl<'a, 'set, Set> GameContext<'a, 'set, Set> {
+    pub(super) fn from_game(game: &'a Game<'set, Set>) -> Self {
         Self { game }
     }
 

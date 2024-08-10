@@ -10,7 +10,7 @@ pub struct SpaceContext<'ctx, 'set> {
 }
 
 impl<'ctx, 'set> SpaceContext<'ctx, 'set> {
-    pub(super) fn new(ctx: Context<'ctx, 'set>, space: Space) -> Self {
+    pub(super) fn new<T>(ctx: Context<'ctx, 'set, T>, space: Space) -> Self {
         Self {
             inner: space,
             piece: ctx.pieces().find(|piece| piece.space() == &space),

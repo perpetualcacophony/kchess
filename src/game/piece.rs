@@ -31,9 +31,9 @@ impl Piece<'_> {
         self.partial().captured
     }
 
-    pub fn dangerous_spaces<'a: 'b, 'b>(
+    pub fn dangerous_spaces<'a: 'b, 'b, T>(
         &'a self,
-        ctx: Context<'b, '_>,
+        ctx: Context<'b, '_, T>,
     ) -> impl Iterator<Item = Space> + 'b {
         ctx.pieces()
             .clone()
@@ -47,9 +47,9 @@ impl Piece<'_> {
         &self.partial().space
     }
 
-    pub fn reachable_spaces<'a>(
+    pub fn reachable_spaces<'a, T>(
         &'a self,
-        ctx: Context<'a, '_>,
+        ctx: Context<'a, '_, T>,
     ) -> impl Iterator<Item = Space> + 'a {
         self.rays().cast(self.partial()).flat_map(move |cast| {
             let capture = cast.ray().capture();
