@@ -20,4 +20,13 @@ pub trait PrimitivePiece {
     {
         ChessPiece::from_primitive::<Self>()
     }
+
+    fn build(builder: &mut super::PieceBuilder) -> &mut super::PieceBuilder
+    where
+        Self: Sized,
+    {
+        builder
+            .rays(ray::Set::new(Self::add_rays))
+            .stats(super::PieceStats::from_primitive::<Self>())
+    }
 }

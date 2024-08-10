@@ -51,12 +51,7 @@ impl ChessPiece {
     }
 
     pub fn from_primitive<P: PrimitivePiece>() -> Self {
-        Self::from_builder(PieceBuilder::new(|builder| {
-            builder
-                .rays(ray::Set::new(P::add_rays))
-                .stats(PieceStats::from_primitive::<P>())
-        }))
-        .unwrap()
+        Self::from_builder(PieceBuilder::new(P::build)).unwrap()
     }
 }
 
